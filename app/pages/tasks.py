@@ -11,7 +11,7 @@ BOARD_STATUS_KEYS = ["TODO", "IN_PROGRESS", "DONE"]
 EXTRA_STATUSES = ["OVERDUE", "CANCELLED"]  # board() ustunlariga kirmaydi — alohida "Boshqa" ustunida ko'rsatiladi
 ALL_STATUSES = ["TODO", "IN_PROGRESS", "DONE", "OVERDUE", "CANCELLED"]
 PRIORITIES = ["LOW", "MEDIUM", "HIGH", "URGENT"]
-PRIORITY_COLORS = {"LOW": "grey", "MEDIUM": "blue", "HIGH": "orange", "URGENT": "red"}
+PRIORITY_COLORS = {"LOW": "grey-7", "MEDIUM": "info", "HIGH": "warning", "URGENT": "negative"}
 
 register(
     {
@@ -132,7 +132,7 @@ def render() -> None:
             ui.label(t("nav.tasks")).classes("text-2xl font-bold")
             can_create = state.has_permission("tasks.create")
             add_btn = ui.button(t("tasks.new_task_btn"), icon="add", on_click=lambda: _open_create_dialog(reload_board))
-            add_btn.props("unelevated color=indigo-7")
+            add_btn.props("unelevated color=primary")
             add_btn.set_visibility(can_create)
 
         board_row = ui.row().classes("w-full gap-3 items-start").style("flex-wrap:wrap;")
@@ -165,7 +165,7 @@ def _render_column(label: str, items: list[dict], on_changed, movable: bool) -> 
     with ui.column().classes("sp-card bg-white q-pa-sm").style("min-width:270px; max-width:320px;"):
         ui.label(f"{label} ({len(items)})").classes("text-sm font-bold q-mb-xs")
         if not items:
-            ui.label(t("tasks.col_empty")).classes("text-caption text-grey-5")
+            ui.label(t("tasks.col_empty")).classes("text-caption sp-subtle")
         for task in items:
             _render_card(task, on_changed, movable)
 
@@ -181,10 +181,10 @@ def _render_card(task: dict, on_changed, movable: bool) -> None:
                 f"color={PRIORITY_COLORS.get(task.get('priority'), 'grey')}"
             )
         due = task.get("due_date")
-        ui.label(f"{t('tasks.due_prefix')}: {due[:10] if due else '—'}").classes("text-caption text-grey-6")
+        ui.label(f"{t('tasks.due_prefix')}: {due[:10] if due else '—'}").classes("text-caption sp-muted")
         assignee_id = task.get("assignee_id")
         ui.label(f"{t('tasks.assignee_prefix')}: {(assignee_id[:8] + '…') if assignee_id else '—'}").classes(
-            "text-caption text-grey-6"
+            "text-caption sp-muted"
         )
 
         if movable and state.has_permission("tasks.update"):
@@ -216,7 +216,7 @@ def _open_create_dialog(on_saved) -> None:
         priority = ui.select(priority_options, value="MEDIUM", label=t("tasks.priority_label")).props(
             "outlined dense"
         ).classes("w-full")
-        err = ui.label("").classes("text-red-6 text-caption")
+        err = ui.label("").classes("text-negative text-caption")
 
         async def save() -> None:
             if not title.value:
@@ -242,7 +242,7 @@ def _open_create_dialog(on_saved) -> None:
 
         with ui.row().classes("w-full justify-end gap-2 q-mt-md"):
             ui.button(t("common.cancel"), on_click=dialog.close).props("flat")
-            ui.button(t("common.save"), on_click=save).props("unelevated color=indigo-7")
+            ui.button(t("common.save"), on_click=save).props("unelevated color=primary")
     dialog.open()
 
 
@@ -262,7 +262,7 @@ def _open_detail_dialog(task: dict, on_changed) -> None:
         ui.label(f"{t('tasks.assignee_id_field')}: {task.get('assignee_id') or '—'}")
         ui.label(f"{t('tasks.case_id_field')}: {task.get('case_id') or '—'}")
         ui.label(f"{t('tasks.client_id_field')}: {task.get('client_id') or '—'}")
-        err = ui.label("").classes("text-red-6 text-caption")
+        err = ui.label("").classes("text-negative text-caption")
 
         with ui.row().classes("w-full justify-end gap-2 q-mt-md"):
             if state.has_permission("tasks.delete"):
@@ -276,6 +276,6 @@ def _open_detail_dialog(task: dict, on_changed) -> None:
                     dialog.close()
                     await on_changed()
 
-                ui.button(t("common.delete"), on_click=remove).props("flat color=red")
+                ui.button(t("common.delete"), on_click=remove).props("flat color=negative")
             ui.button(t("common.close"), on_click=dialog.close).props("flat")
     dialog.open()

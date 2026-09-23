@@ -91,11 +91,11 @@ def render() -> None:
             ui.label(t("nav.roles")).classes("text-2xl font-bold")
 
             if not state.has_permission("roles.manage"):
-                ui.label(t("roles.no_access")).classes("text-red-6")
+                ui.label(t("roles.no_access")).classes("text-negative")
                 return
 
             ui.button(t("roles.new"), icon="add", on_click=lambda: _open_role_dialog(None, reload)).props(
-                "unelevated color=indigo-7"
+                "unelevated color=primary"
             )
 
         container = ui.column().classes("w-full gap-2")
@@ -106,7 +106,7 @@ def render() -> None:
             except ApiError as exc:
                 container.clear()
                 with container:
-                    ui.label(exc.message).classes("text-red-6")
+                    ui.label(exc.message).classes("text-negative")
                 return
             container.clear()
             with container:
@@ -126,19 +126,19 @@ def _role_card(r: dict, on_changed) -> None:
         if r.get("is_system"):
             ui.badge(t("roles.system_badge")).props("color=grey-6")
         if r.get("description"):
-            ui.label(r["description"]).classes("text-caption text-grey-6")
+            ui.label(r["description"]).classes("text-caption sp-muted")
 
         perms = r.get("permissions") or []
         if not perms:
-            ui.label(t("roles.no_permissions")).classes("text-caption text-grey-5")
+            ui.label(t("roles.no_permissions")).classes("text-caption sp-subtle")
         with ui.row().classes("gap-1 flex-wrap q-mt-xs"):
             for p in perms:
-                ui.badge(p.get("key", "")).props("color=indigo-4")
+                ui.badge(p.get("key", "")).props("color=secondary")
 
-        ui.label(t("roles.users_title")).classes("text-caption text-grey-6 font-medium q-mt-sm")
+        ui.label(t("roles.users_title")).classes("text-caption sp-muted font-medium q-mt-sm")
         users = r.get("users") or []
         if not users:
-            ui.label(t("roles.no_users")).classes("text-caption text-grey-5")
+            ui.label(t("roles.no_users")).classes("text-caption sp-subtle")
         else:
             with ui.row().classes("gap-1 flex-wrap q-mt-xs"):
                 for u in users:
@@ -146,11 +146,11 @@ def _role_card(r: dict, on_changed) -> None:
 
         with ui.row().classes("gap-2 q-mt-sm"):
             ui.button(t("roles.edit"), icon="edit", on_click=lambda r=r: _open_role_dialog(r, on_changed)).props(
-                "flat dense color=indigo-7"
+                "flat dense color=primary"
             )
             delete_btn = ui.button(
                 t("roles.delete"), icon="delete", on_click=lambda r=r: _confirm_delete(r, on_changed)
-            ).props("flat dense color=red")
+            ).props("flat dense color=negative")
             delete_btn.set_visibility(not r.get("is_system"))
 
 
@@ -170,7 +170,7 @@ def _confirm_delete(r: dict, on_changed) -> None:
                 dialog.close()
                 await on_changed()
 
-            ui.button(t("common.delete"), on_click=do_delete).props("unelevated color=red")
+            ui.button(t("common.delete"), on_click=do_delete).props("unelevated color=negative")
     dialog.open()
 
 
@@ -184,7 +184,7 @@ def _open_role_dialog(role: dict | None, on_changed) -> None:
         if role:
             key_input.props("readonly")
         else:
-            ui.label(t("roles.key_hint")).classes("text-caption text-grey-6")
+            ui.label(t("roles.key_hint")).classes("text-caption sp-muted")
         name_input = ui.input(t("roles.name_label"), value=(role or {}).get("name", "")).props(
             "outlined dense"
         ).classes("w-full")
@@ -210,7 +210,7 @@ def _open_role_dialog(role: dict | None, on_changed) -> None:
             checks_col.clear()
             with checks_col:
                 for resource in sorted(by_resource):
-                    ui.label(resource).classes("text-caption text-grey-6 font-medium q-mt-xs")
+                    ui.label(resource).classes("text-caption sp-muted font-medium q-mt-xs")
                     with ui.row().classes("gap-3 flex-wrap"):
                         for p in sorted(by_resource[resource], key=lambda x: x.get("key", "")):
                             cb = ui.checkbox(p["key"], value=p["id"] in selected_ids)
@@ -218,7 +218,7 @@ def _open_role_dialog(role: dict | None, on_changed) -> None:
 
         ui.timer(0.05, load_permissions, once=True)
 
-        err = ui.label("").classes("text-red-6 text-caption")
+        err = ui.label("").classes("text-negative text-caption")
 
         async def save() -> None:
             permission_ids = [pid for pid, cb in checkboxes.items() if cb.value]
@@ -255,5 +255,5 @@ def _open_role_dialog(role: dict | None, on_changed) -> None:
 
         with ui.row().classes("w-full justify-end gap-2 q-mt-md"):
             ui.button(t("common.cancel"), on_click=dialog.close).props("flat")
-            ui.button(t("common.save"), on_click=save).props("unelevated color=indigo-7")
+            ui.button(t("common.save"), on_click=save).props("unelevated color=primary")
     dialog.open()

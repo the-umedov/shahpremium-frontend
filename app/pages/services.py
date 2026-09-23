@@ -92,7 +92,7 @@ def render() -> None:
             ui.label(t("nav.services")).classes("text-2xl font-bold")
             can_manage = state.has_permission("services.manage")
             add_btn = ui.button(t("services.new"), icon="add", on_click=lambda: _open_form_dialog(None, reload))
-            add_btn.props("unelevated color=indigo-7")
+            add_btn.props("unelevated color=primary")
             add_btn.set_visibility(can_manage)
 
         with ui.row().classes("w-full items-end gap-2"):
@@ -172,7 +172,7 @@ def _open_form_dialog(service: dict | None, on_saved) -> None:
         ).classes("w-full")
         is_active = ui.checkbox(t("services.is_active"), value=(service or {}).get("is_active", True) if is_edit else True)
         is_active.set_enabled(can_manage)
-        err = ui.label("").classes("text-red-6 text-caption")
+        err = ui.label("").classes("text-negative text-caption")
 
         async def save() -> None:
             if not name.value or (not is_edit and not code.value):
@@ -220,8 +220,8 @@ def _open_form_dialog(service: dict | None, on_saved) -> None:
 
         with ui.row().classes("w-full justify-end gap-2 q-mt-md"):
             if is_edit and can_manage:
-                ui.button(t("common.delete"), on_click=remove).props("flat color=red")
+                ui.button(t("common.delete"), on_click=remove).props("flat color=negative")
             ui.button(t("common.cancel") if can_manage else t("common.close"), on_click=dialog.close).props("flat")
             if can_manage:
-                ui.button(t("common.save"), on_click=save).props("unelevated color=indigo-7")
+                ui.button(t("common.save"), on_click=save).props("unelevated color=primary")
     dialog.open()

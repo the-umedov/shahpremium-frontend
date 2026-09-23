@@ -5,7 +5,7 @@ from nicegui import ui
 from app import state
 from app.api_client import ApiClient, ApiError
 from app.i18n import LOCALE_LABELS, register, t
-from app.theme import BRAND_OVERRIDE_CSS, GOLD_DEEP
+from app.theme import BRAND_OVERRIDE_CSS
 
 register(
     {
@@ -99,8 +99,8 @@ def render() -> None:
 
     with ui.column().classes("absolute-center items-center gap-1"):
         ui.image("/assets/logo-mammoth.png").style("width:110px;height:110px;")
-        ui.label("SHAH PREMIUM").classes("sp-brand text-xl q-mt-xs").style(f"color:{GOLD_DEEP};")
-        ui.label(t("login.subtitle")).classes("text-sm text-grey-6 q-mb-md")
+        ui.label("SHAH PREMIUM").classes("sp-brand sp-brand-text text-xl q-mt-xs")
+        ui.label(t("login.subtitle")).classes("text-sm sp-muted q-mb-md")
 
         with ui.card().classes("sp-card q-pa-lg").style("width:380px; border-radius:16px;"):
             with ui.tabs().classes("w-full") as auth_tabs:
@@ -112,7 +112,7 @@ def render() -> None:
                 with ui.tab_panel(register_tab).classes("q-pa-none q-pt-md"):
                     _register_panel()
 
-        ui.label(t("login.copyright")).classes("text-caption text-grey-5 q-mt-md")
+        ui.label(t("login.copyright")).classes("text-caption sp-subtle q-mt-md")
 
 
 def _login_panel() -> None:
@@ -121,7 +121,7 @@ def _login_panel() -> None:
         "outlined dense"
     ).classes("w-full q-mt-sm")
     otp = ui.input(t("auth.otp")).props("outlined dense").classes("w-full q-mt-sm")
-    error_label = ui.label("").classes("text-red-6 text-caption")
+    error_label = ui.label("").classes("text-negative text-caption")
 
     async def do_login() -> None:
         error_label.text = ""
@@ -130,7 +130,7 @@ def _login_panel() -> None:
             return
         await _finish_login(identifier.value, password.value, error_label)
 
-    ui.button(t("auth.submit"), on_click=do_login).props("unelevated color=indigo-7").classes("w-full q-mt-md")
+    ui.button(t("auth.submit"), on_click=do_login).props("unelevated color=primary").classes("w-full q-mt-md")
     password.on("keydown.enter", do_login)
     otp.on("keydown.enter", do_login)
 
@@ -146,7 +146,7 @@ def _register_panel() -> None:
     confirm = ui.input(t("register.confirm_password"), password=True, password_toggle_button=True).props(
         "outlined dense"
     ).classes("w-full q-mt-sm")
-    error_label = ui.label("").classes("text-red-6 text-caption")
+    error_label = ui.label("").classes("text-negative text-caption")
 
     async def do_register() -> None:
         error_label.text = ""
@@ -179,5 +179,5 @@ def _register_panel() -> None:
         # qulaylik uchun darhol shu login/parol bilan kirishga urinamiz.
         await _finish_login(email.value, password.value, error_label)
 
-    ui.button(t("register.submit"), on_click=do_register).props("unelevated color=indigo-7").classes("w-full q-mt-md")
+    ui.button(t("register.submit"), on_click=do_register).props("unelevated color=primary").classes("w-full q-mt-md")
     confirm.on("keydown.enter", do_register)

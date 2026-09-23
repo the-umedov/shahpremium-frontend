@@ -266,7 +266,7 @@ def _open_detail_dialog(employee_id: str, on_changed) -> None:
             except ApiError as exc:
                 content.clear()
                 with content:
-                    ui.label(exc.message).classes("text-red-6")
+                    ui.label(exc.message).classes("text-negative")
                 return
             content.clear()
             with content:
@@ -277,7 +277,7 @@ def _open_detail_dialog(employee_id: str, on_changed) -> None:
                     ui.badge(status_display).classes("q-px-sm")
                 ui.label(
                     t("employees.detail_line").format(kind=kind_display, position=data.get("position") or "—")
-                ).classes("text-caption text-grey-6")
+                ).classes("text-caption sp-muted")
 
                 with ui.row().classes("gap-6 q-mt-sm"):
                     ui.label(t("employees.specialization_line").format(value=data.get("specialization") or "—"))
@@ -304,11 +304,11 @@ def _open_detail_dialog(employee_id: str, on_changed) -> None:
                         ("contracts", t("nav.contracts")), ("tasks", t("nav.tasks")),
                     ]:
                         with ui.column().classes("items-center"):
-                            ui.label(str(stats.get(key, 0))).classes("text-lg font-bold text-indigo-700")
-                            ui.label(label).classes("text-caption text-grey-6")
+                            ui.label(str(stats.get(key, 0))).classes("text-lg font-bold text-primary")
+                            ui.label(label).classes("text-caption sp-muted")
                     with ui.column().classes("items-center"):
-                        ui.label(f"{stats.get('commission_earned', 0):,}").classes("text-lg font-bold text-green-700")
-                        ui.label(t("employees.commission_earned")).classes("text-caption text-grey-6")
+                        ui.label(f"{stats.get('commission_earned', 0):,}").classes("text-lg font-bold text-positive")
+                        ui.label(t("employees.commission_earned")).classes("text-caption sp-muted")
 
                 if state.has_permission("employees.update"):
                     ui.separator().classes("q-my-sm")
@@ -346,7 +346,7 @@ def _open_detail_dialog(employee_id: str, on_changed) -> None:
                     office_sel = ui.select(
                         office_options, value=data.get("office_id"), label=t("employees.office")
                     ).props("outlined dense clearable").classes("w-full")
-                    edit_err = ui.label("").classes("text-red-6 text-caption")
+                    edit_err = ui.label("").classes("text-negative text-caption")
 
                     async def save_edit() -> None:
                         payload = {
@@ -367,7 +367,7 @@ def _open_detail_dialog(employee_id: str, on_changed) -> None:
                         await load()
                         await on_changed()
 
-                    ui.button(t("common.save"), on_click=save_edit).props("unelevated color=indigo-7")
+                    ui.button(t("common.save"), on_click=save_edit).props("unelevated color=primary")
 
                     ui.separator().classes("q-my-sm")
                     ui.label(t("employees.commission_percent")).classes("text-md font-semibold")
@@ -387,7 +387,7 @@ def _open_detail_dialog(employee_id: str, on_changed) -> None:
                             ui.notify(t("employees.commission_updated"), type="positive")
                             await load()
 
-                        ui.button(t("employees.save_commission"), on_click=save_commission).props("flat color=indigo-7")
+                        ui.button(t("employees.save_commission"), on_click=save_commission).props("flat color=primary")
 
                     ui.separator().classes("q-my-sm")
                     ui.label(t("employees.schedule_title")).classes("text-md font-semibold")
@@ -407,7 +407,7 @@ def _open_detail_dialog(employee_id: str, on_changed) -> None:
                                 "outlined dense"
                             ).classes("w-28")
                             day_inputs[day_idx] = (active_cb, start_in, end_in)
-                    schedule_err = ui.label("").classes("text-red-6 text-caption")
+                    schedule_err = ui.label("").classes("text-negative text-caption")
 
                     async def save_schedule() -> None:
                         items = []
@@ -429,7 +429,7 @@ def _open_detail_dialog(employee_id: str, on_changed) -> None:
                         ui.notify(t("employees.schedule_saved"), type="positive")
                         await load()
 
-                    ui.button(t("employees.save_schedule"), on_click=save_schedule).props("flat color=indigo-7")
+                    ui.button(t("employees.save_schedule"), on_click=save_schedule).props("flat color=primary")
 
                 with ui.row().classes("w-full justify-end gap-2 q-mt-md"):
                     ui.button(t("common.close"), on_click=dialog.close).props("flat")

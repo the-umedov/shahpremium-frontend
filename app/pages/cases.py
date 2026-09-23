@@ -140,7 +140,7 @@ def render() -> None:
         with ui.row().classes("w-full items-center justify-between"):
             ui.label(t("nav.cases")).classes("text-2xl font-bold")
             btn = ui.button(t("cases.new"), icon="add", on_click=lambda: _open_create_dialog(reload))
-            btn.props("unelevated color=indigo-7")
+            btn.props("unelevated color=primary")
             btn.set_visibility(state.has_permission("cases.create"))
 
         search = ui.input(t("cases.search_placeholder")).props("outlined dense clearable").classes("w-full")
@@ -174,7 +174,7 @@ def _open_create_dialog(on_saved) -> None:
         description = ui.textarea(t("cases.description")).props("outlined dense").classes("w-full")
         case_type = ui.input(t("cases.case_type")).props("outlined dense").classes("w-full")
         priority = ui.select(PRIORITIES, value="NORMAL", label=t("cases.col_priority")).props("outlined dense").classes("w-full")
-        err = ui.label("").classes("text-red-6 text-caption")
+        err = ui.label("").classes("text-negative text-caption")
 
         async def save() -> None:
             if not title.value or not client_id.value:
@@ -198,7 +198,7 @@ def _open_create_dialog(on_saved) -> None:
 
         with ui.row().classes("w-full justify-end gap-2 q-mt-md"):
             ui.button(t("common.cancel"), on_click=dialog.close).props("flat")
-            ui.button(t("common.save"), on_click=save).props("unelevated color=indigo-7")
+            ui.button(t("common.save"), on_click=save).props("unelevated color=primary")
     dialog.open()
 
 
@@ -214,14 +214,14 @@ def _open_detail_dialog(case_id: str, on_changed) -> None:
             except ApiError as exc:
                 content.clear()
                 with content:
-                    ui.label(exc.message).classes("text-red-6")
+                    ui.label(exc.message).classes("text-negative")
                 return
             content.clear()
             with content:
                 with ui.row().classes("items-center justify-between w-full"):
                     ui.label(data.get("title", "")).classes("text-xl font-bold")
                     ui.badge(_status_label(data.get("status", ""))).classes("q-px-sm")
-                ui.label(f"{t('cases.col_number')} {data.get('number', '')}").classes("text-caption text-grey-6")
+                ui.label(f"{t('cases.col_number')} {data.get('number', '')}").classes("text-caption sp-muted")
                 client = data.get("client") or {}
                 ui.label(f"{t('cases.col_client')}: {client.get('full_name', '—')}")
                 ui.label(f"{t('cases.description')}: {data.get('description') or '—'}")
@@ -241,13 +241,13 @@ def _open_detail_dialog(case_id: str, on_changed) -> None:
                         ui.notify(t("cases.status_updated"), type="positive")
                         await load()
 
-                    ui.button(t("cases.save_status"), on_click=change_status).props("flat color=indigo-7")
+                    ui.button(t("cases.save_status"), on_click=change_status).props("flat color=primary")
 
                 ui.separator().classes("q-my-sm")
                 ui.label(t("cases.notes_title")).classes("text-md font-semibold")
                 notes = data.get("notes") or []
                 if not notes:
-                    ui.label(t("cases.no_notes")).classes("text-caption text-grey-5")
+                    ui.label(t("cases.no_notes")).classes("text-caption sp-subtle")
                 for n in notes[:10]:
                     ui.label(f"• {n.get('body', '')}").classes("text-sm")
 
@@ -266,7 +266,7 @@ def _open_detail_dialog(case_id: str, on_changed) -> None:
                             note_body.value = ""
                             await load()
 
-                        ui.button(t("cases.add"), on_click=add_note).props("flat color=indigo-7")
+                        ui.button(t("cases.add"), on_click=add_note).props("flat color=primary")
 
                 with ui.row().classes("w-full justify-end gap-2 q-mt-md"):
                     if state.has_permission("cases.delete"):
@@ -280,7 +280,7 @@ def _open_detail_dialog(case_id: str, on_changed) -> None:
                             dialog.close()
                             await on_changed()
 
-                        ui.button(t("common.delete"), on_click=remove).props("flat color=red")
+                        ui.button(t("common.delete"), on_click=remove).props("flat color=negative")
                     ui.button(t("common.close"), on_click=dialog.close).props("flat")
 
         ui.timer(0.05, load, once=True)

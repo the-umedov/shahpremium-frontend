@@ -134,7 +134,7 @@ def _render_preferences_section() -> None:
                 notify_email = ui.switch(t("settings.notify_email"), value=pref.get("notify_email", True))
                 notify_sms = ui.switch(t("settings.notify_sms"), value=pref.get("notify_sms", False))
                 notify_push = ui.switch(t("settings.notify_push"), value=pref.get("notify_push", False))
-            err = ui.label("").classes("text-red-6 text-caption")
+            err = ui.label("").classes("text-negative text-caption")
 
             async def save() -> None:
                 payload = {
@@ -160,7 +160,7 @@ def _render_preferences_section() -> None:
                 # butun sahifada qo'llash uchun to'liq qayta yuklaymiz.
                 ui.navigate.reload()
 
-            ui.button(t("common.save"), on_click=save).props("unelevated color=indigo-7").classes("q-mt-sm")
+            ui.button(t("common.save"), on_click=save).props("unelevated color=primary").classes("q-mt-sm")
 
     ui.timer(0.05, load, once=True)
 
@@ -170,7 +170,7 @@ def _render_system_settings_section() -> None:
         ui.label(t("settings.kv_title")).classes("text-md")
         ui.button(
             t("settings.kv_new"), icon="add", on_click=lambda: _open_setting_dialog(None, reload)
-        ).props("unelevated color=indigo-7")
+        ).props("unelevated color=primary")
 
     list_col = ui.column().classes("w-full gap-1")
 
@@ -183,7 +183,7 @@ def _render_system_settings_section() -> None:
         list_col.clear()
         with list_col:
             if not items:
-                ui.label(t("settings.kv_none")).classes("text-caption text-grey-5")
+                ui.label(t("settings.kv_none")).classes("text-caption sp-subtle")
             for s in items:
                 with ui.row().classes(
                     "w-full items-center justify-between sp-card q-pa-sm cursor-pointer"
@@ -191,7 +191,7 @@ def _render_system_settings_section() -> None:
                     with ui.column().classes("gap-0"):
                         ui.label(s.get("key", "")).classes("font-medium")
                         ui.label(json.dumps(s.get("value"), ensure_ascii=False)[:80]).classes(
-                            "text-caption text-grey-6"
+                            "text-caption sp-muted"
                         )
                     ui.badge(s.get("scope", "GLOBAL"))
 
@@ -211,7 +211,7 @@ def _open_setting_dialog(item: dict | None, on_saved) -> None:
         value = ui.textarea(t("settings.kv_value"), value=value_text).props("outlined dense").classes("w-full").style(
             "font-family:monospace;"
         )
-        err = ui.label("").classes("text-red-6 text-caption")
+        err = ui.label("").classes("text-negative text-caption")
 
         async def save() -> None:
             if not key.value:
@@ -234,5 +234,5 @@ def _open_setting_dialog(item: dict | None, on_saved) -> None:
 
         with ui.row().classes("w-full justify-end gap-2 q-mt-md"):
             ui.button(t("common.cancel"), on_click=dialog.close).props("flat")
-            ui.button(t("common.save"), on_click=save).props("unelevated color=indigo-7")
+            ui.button(t("common.save"), on_click=save).props("unelevated color=primary")
     dialog.open()

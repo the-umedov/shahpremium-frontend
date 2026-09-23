@@ -61,7 +61,7 @@ def render() -> None:
             ui.label(t("nav.offices")).classes("text-2xl font-bold")
             can_manage = state.has_permission("offices.manage")
             add_btn = ui.button(t("offices.new"), icon="add", on_click=lambda: _open_form_dialog(None, reload))
-            add_btn.props("unelevated color=indigo-7")
+            add_btn.props("unelevated color=primary")
             add_btn.set_visibility(can_manage)
 
         table = ui.table(columns=columns, rows=[], row_key="id").classes("w-full sp-card").props("flat bordered")
@@ -94,7 +94,7 @@ def _open_form_dialog(office: dict | None, on_saved) -> None:
         name = ui.input(f"{t('common.name')} *", value=(office or {}).get("name", "")).props("outlined dense").classes("w-full")
         address = ui.input(t("offices.address"), value=(office or {}).get("address") or "").props("outlined dense").classes("w-full")
         region_select = ui.select({}, label=f"{t('offices.region')} *").props("outlined dense").classes("w-full")
-        err = ui.label("").classes("text-red-6 text-caption")
+        err = ui.label("").classes("text-negative text-caption")
 
         async def load_regions() -> None:
             try:
@@ -140,9 +140,9 @@ def _open_form_dialog(office: dict | None, on_saved) -> None:
 
         with ui.row().classes("w-full justify-end gap-2 q-mt-md"):
             if is_edit and state.has_permission("offices.manage"):
-                ui.button(t("common.delete"), on_click=remove).props("flat color=red")
+                ui.button(t("common.delete"), on_click=remove).props("flat color=negative")
             ui.button(t("common.cancel"), on_click=dialog.close).props("flat")
-            ui.button(t("common.save"), on_click=save).props("unelevated color=indigo-7")
+            ui.button(t("common.save"), on_click=save).props("unelevated color=primary")
 
         ui.timer(0.05, load_regions, once=True)
     dialog.open()

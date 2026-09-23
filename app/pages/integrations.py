@@ -138,7 +138,7 @@ def render() -> None:
 
     with shell(active="/integrations"):
         if not state.has_permission("integrations.manage"):
-            ui.label(t("integrations.forbidden")).classes("text-red-6")
+            ui.label(t("integrations.forbidden")).classes("text-negative")
             return
 
         ui.label(t("nav.integrations")).classes("text-2xl font-bold")
@@ -160,7 +160,7 @@ def _render_integrations_panel() -> None:
         ui.label(t("integrations.connected_title")).classes("text-lg font-semibold")
         ui.button(
             t("integrations.new"), icon="add", on_click=lambda: _open_integration_dialog(None, reload)
-        ).props("unelevated color=indigo-7")
+        ).props("unelevated color=primary")
 
     list_col = ui.column().classes("w-full gap-2")
 
@@ -173,13 +173,13 @@ def _render_integrations_panel() -> None:
         list_col.clear()
         with list_col:
             if not items:
-                ui.label(t("integrations.empty")).classes("text-caption text-grey-5")
+                ui.label(t("integrations.empty")).classes("text-caption sp-subtle")
             for it in items:
                 with ui.row().classes("w-full items-center justify-between sp-card q-pa-sm"):
                     with ui.column().classes("gap-0"):
                         ui.label(f"{it.get('name')} ({it.get('key')})").classes("font-medium")
                         ui.label(t(f"status.{it['type']}") if it.get("type") else "—").classes(
-                            "text-caption text-grey-6"
+                            "text-caption sp-muted"
                         )
                     with ui.row().classes("items-center gap-2"):
                         ui.switch(
@@ -231,7 +231,7 @@ def _open_integration_dialog(item: dict | None, on_saved) -> None:
         config = ui.textarea(t("integrations.config_label"), value=config_text).props("outlined dense").classes(
             "w-full"
         ).style("font-family:monospace;")
-        err = ui.label("").classes("text-red-6 text-caption")
+        err = ui.label("").classes("text-negative text-caption")
 
         async def save() -> None:
             if not key.value or not name.value:
@@ -260,7 +260,7 @@ def _open_integration_dialog(item: dict | None, on_saved) -> None:
 
         with ui.row().classes("w-full justify-end gap-2 q-mt-md"):
             ui.button(t("common.cancel"), on_click=dialog.close).props("flat")
-            ui.button(t("common.save"), on_click=save).props("unelevated color=indigo-7")
+            ui.button(t("common.save"), on_click=save).props("unelevated color=primary")
     dialog.open()
 
 
@@ -268,7 +268,7 @@ def _render_partners_panel() -> None:
     with ui.row().classes("w-full items-center justify-between"):
         ui.label(t("integrations.tab_partners")).classes("text-lg font-semibold")
         ui.button(t("integrations.new_partner"), icon="add", on_click=lambda: _open_partner_dialog(None, reload)).props(
-            "unelevated color=indigo-7"
+            "unelevated color=primary"
         )
 
     list_col = ui.column().classes("w-full gap-2")
@@ -282,17 +282,17 @@ def _render_partners_panel() -> None:
         list_col.clear()
         with list_col:
             if not items:
-                ui.label(t("integrations.partners_empty")).classes("text-caption text-grey-5")
+                ui.label(t("integrations.partners_empty")).classes("text-caption sp-subtle")
             for p in items:
                 with ui.row().classes("w-full items-center justify-between sp-card q-pa-sm"):
                     with ui.column().classes("gap-0"):
                         with ui.row().classes("items-center gap-2"):
                             ui.label(p.get("name", "")).classes("font-medium")
                             ui.badge(t(f"status.{p['status']}") if p.get("status") else "").classes("q-px-sm")
-                        ui.label(p.get("description") or "—").classes("text-caption text-grey-6")
+                        ui.label(p.get("description") or "—").classes("text-caption sp-muted")
                         if p.get("contract_number"):
                             ui.label(t("integrations.contract_label").format(value=p["contract_number"])).classes(
-                                "text-caption text-grey-6"
+                                "text-caption sp-muted"
                             )
                     with ui.row().classes("items-center gap-2"):
                         ui.button(icon="edit", on_click=lambda i=p: _open_partner_dialog(i, reload)).props(
@@ -300,7 +300,7 @@ def _render_partners_panel() -> None:
                         )
                         ui.button(
                             icon="delete", on_click=lambda i=p: _remove_partner(i["id"], reload)
-                        ).props("flat dense round color=red")
+                        ).props("flat dense round color=negative")
 
     ui.timer(0.05, reload, once=True)
 
@@ -337,7 +337,7 @@ def _open_partner_dialog(item: dict | None, on_saved) -> None:
         status = ui.select(
             status_options, value=(item or {}).get("status", "ACTIVE"), label=t("common.status")
         ).props("outlined dense").classes("w-full")
-        err = ui.label("").classes("text-red-6 text-caption")
+        err = ui.label("").classes("text-negative text-caption")
 
         async def save() -> None:
             if not name.value:
@@ -364,5 +364,5 @@ def _open_partner_dialog(item: dict | None, on_saved) -> None:
 
         with ui.row().classes("w-full justify-end gap-2 q-mt-md"):
             ui.button(t("common.cancel"), on_click=dialog.close).props("flat")
-            ui.button(t("common.save"), on_click=save).props("unelevated color=indigo-7")
+            ui.button(t("common.save"), on_click=save).props("unelevated color=primary")
     dialog.open()

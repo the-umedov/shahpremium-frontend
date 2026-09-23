@@ -121,7 +121,7 @@ def render() -> None:
         with ui.row().classes("w-full items-center justify-between"):
             ui.label(t("nav.documents")).classes("text-2xl font-bold")
             btn = ui.button(t("documents.upload"), icon="upload", on_click=lambda: _open_upload_dialog(reload))
-            btn.props("unelevated color=indigo-7")
+            btn.props("unelevated color=primary")
             btn.set_visibility(state.has_permission("documents.upload"))
 
         search = ui.input(t("documents.search_placeholder")).props("outlined dense clearable").classes("w-full")
@@ -152,7 +152,7 @@ def _open_upload_dialog(on_saved) -> None:
         case_id = ui.input(t("documents.case_id_input")).props("outlined dense").classes("w-full")
         client_id = ui.input(t("documents.client_id_input")).props("outlined dense").classes("w-full")
         access_level = ui.select(ACCESS_LEVELS, value="OFFICE", label=t("documents.col_access_level")).props("outlined dense").classes("w-full")
-        err = ui.label("").classes("text-red-6 text-caption")
+        err = ui.label("").classes("text-negative text-caption")
         picked = {"content": None, "name": None, "type": None}
 
         def on_upload(e) -> None:
@@ -190,7 +190,7 @@ def _open_upload_dialog(on_saved) -> None:
 
         with ui.row().classes("w-full justify-end gap-2 q-mt-md"):
             ui.button(t("common.cancel"), on_click=dialog.close).props("flat")
-            ui.button(t("common.save"), on_click=save).props("unelevated color=indigo-7")
+            ui.button(t("common.save"), on_click=save).props("unelevated color=primary")
     dialog.open()
 
 
@@ -206,7 +206,7 @@ def _open_detail_dialog(document_id: str, on_changed) -> None:
             except ApiError as exc:
                 content.clear()
                 with content:
-                    ui.label(exc.message).classes("text-red-6")
+                    ui.label(exc.message).classes("text-negative")
                 return
             content.clear()
             with content:
@@ -238,7 +238,7 @@ def _open_detail_dialog(document_id: str, on_changed) -> None:
                     ui.notify(t("documents.link_line").format(url=link.get("url")), type="info", timeout=10000)
 
                 with ui.row().classes("w-full justify-end gap-2 q-mt-md"):
-                    ui.button(t("documents.download_link"), icon="link", on_click=get_link).props("flat color=indigo-7")
+                    ui.button(t("documents.download_link"), icon="link", on_click=get_link).props("flat color=primary")
                     if state.has_permission("documents.delete"):
                         async def remove() -> None:
                             try:
@@ -250,7 +250,7 @@ def _open_detail_dialog(document_id: str, on_changed) -> None:
                             dialog.close()
                             await on_changed()
 
-                        ui.button(t("common.delete"), on_click=remove).props("flat color=red")
+                        ui.button(t("common.delete"), on_click=remove).props("flat color=negative")
                     ui.button(t("common.close"), on_click=dialog.close).props("flat")
 
         ui.timer(0.05, load, once=True)

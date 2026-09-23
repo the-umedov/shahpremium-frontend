@@ -24,7 +24,7 @@ def render() -> None:
     with shell(active="/"):
         ui.label(t("nav.dashboard")).classes("text-2xl font-bold")
         roles = ", ".join(me.get("roles") or []) or t("dashboard.no_roles")
-        ui.label(f"{t('dashboard.welcome')} — {t('dashboard.roles')}: {roles}").classes("text-grey-7")
+        ui.label(f"{t('dashboard.welcome')} — {t('dashboard.roles')}: {roles}").classes("sp-text-2")
 
         # Telefonda 2x2, planshet/kompyuterda 4 ustunli qator.
         # DIQQAT: `columns=` parametrini bermaymiz — u inline `style` sifatida
@@ -40,8 +40,8 @@ def render() -> None:
 
 def _stat_card(label: str, resource: str, perm: str, icon: str) -> None:
     with ui.card().classes("sp-card q-pa-md w-full"):
-        ui.icon(icon).classes("text-3xl text-indigo-600")
-        ui.label(label).classes("text-grey-7 text-sm")
+        ui.icon(icon).classes("text-3xl text-primary")
+        ui.label(label).classes("sp-text-2 text-sm")
         value_label = ui.label("…").classes("text-2xl font-bold")
 
         async def load() -> None:

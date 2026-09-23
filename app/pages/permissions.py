@@ -58,7 +58,7 @@ def render() -> None:
         ui.label(t("nav.permissions")).classes("text-2xl font-bold")
 
         if not state.has_permission("roles.manage"):
-            ui.label(t("permissions.no_access")).classes("text-red-6")
+            ui.label(t("permissions.no_access")).classes("text-negative")
             return
 
         with ui.row().classes("w-full items-end gap-2"):

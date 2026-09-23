@@ -107,7 +107,7 @@ def render() -> None:
             ui.label(t("nav.clients")).classes("text-2xl font-bold")
             can_create = state.has_permission("clients.create")
             add_btn = ui.button(t("clients.new"), icon="add", on_click=lambda: _open_create_dialog(reload))
-            add_btn.props("unelevated color=indigo-7")
+            add_btn.props("unelevated color=primary")
             add_btn.set_visibility(can_create)
 
         search = ui.input(t("clients.search_placeholder")).props("outlined dense clearable").classes("w-full")
@@ -161,7 +161,7 @@ def _open_create_dialog(on_saved) -> None:
         email = ui.input(t("clients.col_email")).props("outlined dense").classes("w-full")
         address = ui.textarea(t("clients.address")).props("outlined dense").classes("w-full")
         tax_id = ui.input(t("clients.tax_id")).props("outlined dense").classes("w-full")
-        err = ui.label("").classes("text-red-6 text-caption")
+        err = ui.label("").classes("text-negative text-caption")
 
         async def save() -> None:
             if not full_name.value:
@@ -186,7 +186,7 @@ def _open_create_dialog(on_saved) -> None:
 
         with ui.row().classes("w-full justify-end gap-2 q-mt-md"):
             ui.button(t("common.cancel"), on_click=dialog.close).props("flat")
-            ui.button(t("common.save"), on_click=save).props("unelevated color=indigo-7")
+            ui.button(t("common.save"), on_click=save).props("unelevated color=primary")
     dialog.open()
 
 
@@ -202,14 +202,14 @@ def _open_detail_dialog(client_id: str, on_changed) -> None:
             except ApiError as exc:
                 content.clear()
                 with content:
-                    ui.label(exc.message).classes("text-red-6")
+                    ui.label(exc.message).classes("text-negative")
                 return
             content.clear()
             with content:
                 with ui.row().classes("items-center justify-between w-full"):
                     ui.label(data.get("full_name", "")).classes("text-xl font-bold")
                     ui.badge(_status_label(data.get("client_type", ""))).classes("q-px-sm")
-                ui.label(f"{t('clients.col_code')}: {data.get('code', '')}").classes("text-caption text-grey-6")
+                ui.label(f"{t('clients.col_code')}: {data.get('code', '')}").classes("text-caption sp-muted")
 
                 with ui.row().classes("gap-6 q-mt-sm"):
                     ui.label(f"{t('clients.col_phone')}: {data.get('phone') or '—'}")
@@ -224,24 +224,24 @@ def _open_detail_dialog(client_id: str, on_changed) -> None:
                         ("documents", t("nav.documents")), ("payments", t("nav.payments")),
                     ]:
                         with ui.column().classes("items-center"):
-                            ui.label(str(stats.get(key, 0))).classes("text-lg font-bold text-indigo-700")
-                            ui.label(label).classes("text-caption text-grey-6")
+                            ui.label(str(stats.get(key, 0))).classes("text-lg font-bold text-primary")
+                            ui.label(label).classes("text-caption sp-muted")
                     with ui.column().classes("items-center"):
-                        ui.label(f"{stats.get('total_paid', 0):,}").classes("text-lg font-bold text-green-700")
-                        ui.label(t("clients.total_paid")).classes("text-caption text-grey-6")
+                        ui.label(f"{stats.get('total_paid', 0):,}").classes("text-lg font-bold text-positive")
+                        ui.label(t("clients.total_paid")).classes("text-caption sp-muted")
 
                 ui.separator().classes("q-my-sm")
                 ui.label(t("clients.history_title")).classes("text-md font-semibold")
                 timeline = data.get("timeline") or []
                 if not timeline:
-                    ui.label(t("clients.no_history")).classes("text-caption text-grey-5")
+                    ui.label(t("clients.no_history")).classes("text-caption sp-subtle")
                 for ev in timeline[:10]:
                     with ui.row().classes("items-start gap-2"):
-                        ui.icon("fiber_manual_record").classes("text-xs text-indigo-400 q-mt-xs")
+                        ui.icon("fiber_manual_record").classes("text-xs text-secondary q-mt-xs")
                         with ui.column().classes("gap-0"):
                             ui.label(ev.get("title", "")).classes("text-sm font-medium")
                             if ev.get("description"):
-                                ui.label(ev["description"]).classes("text-caption text-grey-6")
+                                ui.label(ev["description"]).classes("text-caption sp-muted")
 
                 if state.has_permission("clients.update"):
                     ui.separator().classes("q-my-sm")
@@ -259,7 +259,7 @@ def _open_detail_dialog(client_id: str, on_changed) -> None:
                             note_title.value = ""
                             await load()
 
-                        ui.button(t("clients.add"), on_click=add_note).props("flat color=indigo-7")
+                        ui.button(t("clients.add"), on_click=add_note).props("flat color=primary")
 
                 with ui.row().classes("w-full justify-end gap-2 q-mt-md"):
                     if state.has_permission("clients.delete"):
@@ -273,7 +273,7 @@ def _open_detail_dialog(client_id: str, on_changed) -> None:
                             dialog.close()
                             await on_changed()
 
-                        ui.button(t("common.delete"), on_click=remove).props("flat color=red")
+                        ui.button(t("common.delete"), on_click=remove).props("flat color=negative")
                     ui.button(t("common.close"), on_click=dialog.close).props("flat")
 
         ui.timer(0.05, load, once=True)

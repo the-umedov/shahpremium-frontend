@@ -215,7 +215,7 @@ def render(active_tab: str = "list") -> None:
             ui.label(t("nav.appointments")).classes("text-2xl font-bold")
             can_manage = state.has_permission("appointments.manage")
             book_btn = ui.button(t("appointments.book"), icon="add", on_click=lambda: _open_book_dialog(reload_list))
-            book_btn.props("unelevated color=indigo-7")
+            book_btn.props("unelevated color=primary")
             book_btn.set_visibility(can_manage)
 
         with ui.tabs().classes("w-full") as tabs:
@@ -281,7 +281,7 @@ def _render_queue_tab() -> None:
             ui.notify(t("appointments.joined_queue_notify"), type="positive")
             await reload_board()
 
-        ui.button(t("appointments.join_queue_btn"), icon="how_to_reg", on_click=join).props("unelevated color=indigo-7")
+        ui.button(t("appointments.join_queue_btn"), icon="how_to_reg", on_click=join).props("unelevated color=primary")
         ui.button(t("appointments.refresh"), icon="refresh", on_click=lambda: reload_board()).props("flat")
 
     board_row = ui.row().classes("w-full gap-3 items-start")
@@ -300,7 +300,7 @@ def _render_queue_tab() -> None:
                 with ui.column().classes("sp-card bg-white q-pa-sm").style("min-width:200px; max-width:240px;"):
                     ui.label(f"{label} ({len(entries)})").classes("text-sm font-bold q-mb-xs")
                     if not entries:
-                        ui.label(t("appointments.queue_empty")).classes("text-caption text-grey-5")
+                        ui.label(t("appointments.queue_empty")).classes("text-caption sp-subtle")
                     for e in entries:
                         with ui.row().classes("items-center justify-between w-full q-py-xs"):
                             ui.label(f"№{e.get('number')}").classes("text-sm font-medium")
@@ -315,7 +315,7 @@ def _render_queue_tab() -> None:
                                     await reload_board()
 
                                 ui.button(icon="arrow_forward", on_click=advance).props(
-                                    "flat dense round size=sm color=indigo-7"
+                                    "flat dense round size=sm color=primary"
                                 )
 
     ui.timer(0.05, reload_board, once=True)
@@ -359,10 +359,10 @@ def _open_book_dialog(on_saved) -> None:
             specialist_select.options = options
             specialist_select.update()
 
-        ui.button(t("appointments.search_specialists_btn"), on_click=load_specialists).props("flat color=indigo-7")
+        ui.button(t("appointments.search_specialists_btn"), on_click=load_specialists).props("flat color=primary")
 
         date_input = _date_picker(t("appointments.date_label"))
-        slot_label = ui.label(t("appointments.no_time_selected")).classes("text-caption text-grey-6")
+        slot_label = ui.label(t("appointments.no_time_selected")).classes("text-caption sp-muted")
         slots_container = ui.column().classes("w-full gap-1")
 
         async def load_availability() -> None:
@@ -381,7 +381,7 @@ def _open_book_dialog(on_saved) -> None:
             slots = data.get("slots") or []
             with slots_container:
                 if not slots:
-                    ui.label(t("appointments.no_slots")).classes("text-caption text-grey-5")
+                    ui.label(t("appointments.no_slots")).classes("text-caption sp-subtle")
                 with ui.row().classes("gap-1").style("flex-wrap:wrap;"):
                     for s in slots:
                         label = s["start_at"][11:16]
@@ -393,7 +393,7 @@ def _open_book_dialog(on_saved) -> None:
                                 f"{s['start_at'][:16].replace('T', ' ')} - {s['end_at'][11:16]}"
                             )
 
-                        ui.button(label, on_click=pick).props("outline dense color=indigo-7")
+                        ui.button(label, on_click=pick).props("outline dense color=primary")
 
         ui.button(t("appointments.view_availability_btn"), on_click=load_availability).props("flat")
 
@@ -401,7 +401,7 @@ def _open_book_dialog(on_saved) -> None:
         location = ui.input(t("appointments.col_location")).props("outlined dense").classes("w-full")
         client_id = ui.input(t("appointments.client_id_field")).props("outlined dense").classes("w-full")
         case_id = ui.input(t("appointments.case_id_field")).props("outlined dense").classes("w-full")
-        err = ui.label("").classes("text-red-6 text-caption")
+        err = ui.label("").classes("text-negative text-caption")
 
         async def save() -> None:
             if not specialist_select.value or not state_data["selected_slot"] or not title.value:
@@ -428,7 +428,7 @@ def _open_book_dialog(on_saved) -> None:
 
         with ui.row().classes("w-full justify-end gap-2 q-mt-md"):
             ui.button(t("common.cancel"), on_click=dialog.close).props("flat")
-            ui.button(t("common.save"), on_click=save).props("unelevated color=indigo-7")
+            ui.button(t("common.save"), on_click=save).props("unelevated color=primary")
     dialog.open()
 
 
@@ -444,7 +444,7 @@ def _open_detail_dialog(appointment_id: str, on_changed) -> None:
             except ApiError as exc:
                 content.clear()
                 with content:
-                    ui.label(exc.message).classes("text-red-6")
+                    ui.label(exc.message).classes("text-negative")
                 return
             content.clear()
             with content:
@@ -475,7 +475,7 @@ def _open_detail_dialog(appointment_id: str, on_changed) -> None:
                         await load()
                         await on_changed()
 
-                    ui.button(t("appointments.save_status_btn"), on_click=change_status).props("flat color=indigo-7")
+                    ui.button(t("appointments.save_status_btn"), on_click=change_status).props("flat color=primary")
 
                 with ui.row().classes("w-full justify-end gap-2 q-mt-md"):
                     ui.button(t("common.close"), on_click=dialog.close).props("flat")

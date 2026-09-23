@@ -43,7 +43,7 @@ def render() -> None:
 
     with shell(active="/notifications"):
         if not state.has_permission("notifications.read"):
-            ui.label(t("notifications.forbidden")).classes("text-red-6")
+            ui.label(t("notifications.forbidden")).classes("text-negative")
             return
 
         with ui.row().classes("w-full items-center justify-between"):
@@ -51,7 +51,7 @@ def render() -> None:
             mark_all_btn = ui.button(
                 t("notifications.mark_all"), icon="done_all", on_click=lambda: _mark_all(reload)
             )
-            mark_all_btn.props("flat color=indigo-7")
+            mark_all_btn.props("flat color=primary")
 
         unread_only = ui.switch(t("notifications.unread_only"), on_change=lambda e: reload())
 
@@ -76,7 +76,7 @@ def render() -> None:
             list_col.clear()
             with list_col:
                 if not items:
-                    ui.label(t("notifications.empty")).classes("text-caption text-grey-5")
+                    ui.label(t("notifications.empty")).classes("text-caption sp-subtle")
                 for it in items:
                     _render_item(it)
             meta = result.get("meta", {})
@@ -100,15 +100,15 @@ def render() -> None:
             is_read = bool(it.get("is_read"))
             with ui.row().classes(
                 "w-full items-start gap-3 q-pa-sm sp-card cursor-pointer "
-                + ("bg-white" if is_read else "bg-indigo-50")
+                + ("bg-white" if is_read else "sp-active")
             ).on("click", lambda i=it: _mark_one(i["id"])):
                 ui.icon("fiber_manual_record" if not is_read else "check_circle").classes(
-                    ("text-indigo-600" if not is_read else "text-grey-4") + " text-xs q-mt-xs"
+                    ("text-primary" if not is_read else "sp-subtle") + " text-xs q-mt-xs"
                 )
                 with ui.column().classes("gap-0 col"):
                     ui.label(it.get("title", "")).classes("font-bold" if not is_read else "font-normal")
-                    ui.label(it.get("body", "")).classes("text-sm text-grey-7")
-                    ui.label(str(it.get("created_at", ""))[:19]).classes("text-caption text-grey-5")
+                    ui.label(it.get("body", "")).classes("text-sm sp-text-2")
+                    ui.label(str(it.get("created_at", ""))[:19]).classes("text-caption sp-subtle")
 
         async def _mark_one(notification_id: str) -> None:
             try:

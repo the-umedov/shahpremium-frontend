@@ -89,7 +89,7 @@ def render() -> None:
 
     if not state.has_permission("chat.use"):
         with shell(active="/chat"):
-            ui.label(t("chat.forbidden")).classes("text-red-6")
+            ui.label(t("chat.forbidden")).classes("text-negative")
         return
 
     me = state.get_me() or {}
@@ -107,7 +107,7 @@ def render() -> None:
                 with ui.row().classes("w-full items-center justify-between"):
                     ui.label(t("chat.list_title")).classes("font-semibold")
                     ui.button(icon="add", on_click=lambda: _open_new_chat_dialog(reload_chats)).props(
-                        "flat dense round color=indigo-7"
+                        "flat dense round color=primary"
                     )
                 chat_list_col = ui.column().classes("w-full gap-1")
 
@@ -130,21 +130,21 @@ def render() -> None:
             chat_list_col.clear()
             with chat_list_col:
                 if not chats:
-                    ui.label(t("chat.empty")).classes("text-caption text-grey-5")
+                    ui.label(t("chat.empty")).classes("text-caption sp-subtle")
                 for c in chats:
                     is_active = c["id"] == ui_state["chat_id"]
                     with ui.row().classes(
                         "w-full items-center justify-between q-pa-sm rounded-borders cursor-pointer "
-                        + ("bg-indigo-50" if is_active else "")
+                        + ("sp-active" if is_active else "")
                     ).on("click", lambda cid=c["id"]: open_chat(cid)):
                         with ui.column().classes("gap-0"):
                             ui.label(_chat_label(c, my_id)).classes("text-sm font-medium")
                             last = c.get("last_message") or {}
-                            ui.label(last.get("body", "")).classes("text-caption text-grey-6").style(
+                            ui.label(last.get("body", "")).classes("text-caption sp-muted").style(
                                 "max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"
                             )
                         if c.get("unread"):
-                            ui.badge(str(c["unread"])).props("color=red")
+                            ui.badge(str(c["unread"])).props("color=negative")
 
         async def open_chat(chat_id: str) -> None:
             ui_state["chat_id"] = chat_id
@@ -161,7 +161,7 @@ def render() -> None:
             if not chat_id:
                 messages_col.clear()
                 with header_row:
-                    ui.label(t("chat.select_chat")).classes("text-grey-6")
+                    ui.label(t("chat.select_chat")).classes("sp-muted")
                 return
             chat = next((c for c in ui_state["chats"] if c["id"] == chat_id), None)
             with header_row:
@@ -175,7 +175,7 @@ def render() -> None:
             messages_col.clear()
             with messages_col:
                 if not msgs:
-                    ui.label(t("chat.no_messages")).classes("text-caption text-grey-5")
+                    ui.label(t("chat.no_messages")).classes("text-caption sp-subtle")
                 for m in msgs:
                     is_mine = m.get("sender_id") == my_id
                     sender = m.get("sender") or {}
@@ -184,7 +184,7 @@ def render() -> None:
                     with ui.row().classes("w-full " + ("justify-end" if is_mine else "justify-start")):
                         with ui.column().classes(
                             "q-pa-sm rounded-borders "
-                            + ("bg-indigo-600 text-white" if is_mine else "bg-grey-2")
+                            + ("bg-primary text-white" if is_mine else "sp-surface-2")
                         ).style("max-width:70%;"):
                             if not is_mine:
                                 ui.label(sender_name).classes("text-caption font-bold")
@@ -231,7 +231,7 @@ def _open_new_chat_dialog(on_saved) -> None:
         is_internal = ui.switch(t("chat.internal_switch"))
         case_id = ui.input(t("chat.case_id_optional")).props("outlined dense").classes("w-full")
         client_id = ui.input(t("chat.client_id_optional")).props("outlined dense").classes("w-full")
-        err = ui.label("").classes("text-red-6 text-caption")
+        err = ui.label("").classes("text-negative text-caption")
 
         async def save() -> None:
             ids = [x.strip() for x in (member_ids.value or "").split(",") if x.strip()]
@@ -256,5 +256,5 @@ def _open_new_chat_dialog(on_saved) -> None:
 
         with ui.row().classes("w-full justify-end gap-2 q-mt-md"):
             ui.button(t("common.cancel"), on_click=dialog.close).props("flat")
-            ui.button(t("common.create"), on_click=save).props("unelevated color=indigo-7")
+            ui.button(t("common.create"), on_click=save).props("unelevated color=primary")
     dialog.open()

@@ -115,7 +115,7 @@ def shell(active: str = ""):
 
             with ui.row().classes(
                 "items-center gap-3 q-pa-sm full-width rounded-borders cursor-pointer "
-                + ("bg-indigo-50 text-indigo-700" if is_active else "")
+                + ("sp-active text-primary" if is_active else "")
             ).on("click", lambda p=path: _go(p)):
                 ui.icon(icon)
                 ui.label(t(label_key)).classes("text-sm font-medium")

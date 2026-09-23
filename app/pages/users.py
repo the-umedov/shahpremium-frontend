@@ -149,7 +149,7 @@ def _open_detail_dialog(user_row: dict, on_changed) -> None:
                 "outlined dense use-chips"
             ).classes("w-full")
             roles_select.set_enabled(can_update)
-            err = ui.label("").classes("text-red-6 text-caption")
+            err = ui.label("").classes("text-negative text-caption")
 
             async def load_roles() -> None:
                 try:
@@ -179,7 +179,7 @@ def _open_detail_dialog(user_row: dict, on_changed) -> None:
 
                 with ui.row().classes("w-full justify-end gap-2 q-mt-md"):
                     ui.button(t("common.cancel"), on_click=dialog.close).props("flat")
-                    ui.button(t("common.save"), on_click=save).props("unelevated color=indigo-7")
+                    ui.button(t("common.save"), on_click=save).props("unelevated color=primary")
             else:
                 with ui.row().classes("w-full justify-end gap-2 q-mt-md"):
                     ui.button(t("common.close"), on_click=dialog.close).props("flat")

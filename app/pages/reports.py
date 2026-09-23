@@ -95,7 +95,7 @@ def render() -> None:
         ui.label(t("nav.reports")).classes("text-2xl font-bold")
 
         if not state.has_permission("reports.read"):
-            ui.label(t("reports.no_access")).classes("text-red-6")
+            ui.label(t("reports.no_access")).classes("text-negative")
             return
 
         with ui.row().classes("w-full items-end gap-2"):
@@ -111,7 +111,7 @@ def render() -> None:
 
         with ui.row().classes("items-center gap-2"):
             ui.button(t("reports.show"), icon="visibility", on_click=lambda: show_report()).props(
-                "unelevated color=indigo-7"
+                "unelevated color=primary"
             )
             can_export = state.has_permission("reports.export")
             for fmt in EXPORT_FORMATS:
@@ -120,11 +120,11 @@ def render() -> None:
                     icon="download",
                     on_click=lambda f=fmt: do_export(f),
                 )
-                btn.props("flat color=indigo-7")
+                btn.props("flat color=primary")
                 btn.set_visibility(can_export)
 
         title_label = ui.label("").classes("text-lg font-semibold")
-        err_label = ui.label("").classes("text-red-6 text-caption")
+        err_label = ui.label("").classes("text-negative text-caption")
         table = ui.table(columns=[], rows=[], row_key="_row").classes("w-full sp-card").props("flat bordered")
 
         def _params() -> dict:

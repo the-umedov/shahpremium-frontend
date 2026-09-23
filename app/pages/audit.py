@@ -84,7 +84,7 @@ def render() -> None:
 
     with shell(active="/audit"):
         if not state.has_permission("audit.read"):
-            ui.label(t("audit.forbidden")).classes("text-red-6")
+            ui.label(t("audit.forbidden")).classes("text-negative")
             return
 
         ui.label(t("nav.audit")).classes("text-2xl font-bold")
@@ -104,7 +104,7 @@ def render() -> None:
             date_from = ui.input(t("audit.filter_date_from")).props("outlined dense type=date").classes("col-2")
             date_to = ui.input(t("audit.filter_date_to")).props("outlined dense type=date").classes("col-2")
             filter_btn = ui.button(t("audit.filter_btn"), icon="search", on_click=lambda: reload())
-            filter_btn.props("unelevated color=indigo-7")
+            filter_btn.props("unelevated color=primary")
 
         table = ui.table(columns=columns, rows=[], row_key="id").classes("w-full sp-card").props("flat bordered")
         table.on("rowClick", lambda e: _open_detail_dialog(e.args[1]))
@@ -166,7 +166,7 @@ def _open_detail_dialog(row: dict) -> None:
     with ui.dialog() as dialog, ui.card().classes("q-pa-md").style("min-width:520px; max-width:760px;"):
         ui.label(f"{raw.get('entity', '')} — {raw.get('action', '')}").classes("text-lg font-bold")
         ui.label(t("audit.detail_time").format(value=raw.get("created_at", ""))).classes(
-            "text-caption text-grey-6"
+            "text-caption sp-muted"
         )
         ui.label(t("audit.detail_actor").format(value=raw.get("actor_id") or "—"))
         ui.label(t("audit.detail_entity_id").format(value=raw.get("entity_id") or "—"))

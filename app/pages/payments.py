@@ -13,12 +13,12 @@ METHODS = ["CASH", "CARD", "BANK_TRANSFER", "ONLINE"]
 STATUSES = ["PENDING", "PAID", "PARTIAL", "REFUNDED", "FAILED", "CANCELLED"]
 
 STATUS_COLORS = {
-    "PENDING": "orange",
-    "PAID": "green",
-    "PARTIAL": "blue",
-    "REFUNDED": "grey",
-    "FAILED": "red",
-    "CANCELLED": "grey-7",
+    "PENDING": "warning",
+    "PAID": "positive",
+    "PARTIAL": "info",
+    "REFUNDED": "grey-7",
+    "FAILED": "negative",
+    "CANCELLED": "grey-8",
 }
 
 register(
@@ -236,7 +236,7 @@ def render() -> None:
         with ui.row().classes("w-full items-center justify-between"):
             ui.label(t("nav.payments")).classes("text-2xl font-bold")
             add_btn = ui.button(t("payments.create"), icon="add", on_click=lambda: _open_create_dialog(reload))
-            add_btn.props("unelevated color=indigo-7")
+            add_btn.props("unelevated color=primary")
             add_btn.set_visibility(state.has_permission("payments.create"))
 
         summary_row = ui.row().classes("w-full gap-4")
@@ -257,7 +257,7 @@ def render() -> None:
             date_from_f = ui.input(t("payments.filter.date_from")).props("outlined dense").classes("w-48")
             date_to_f = ui.input(t("payments.filter.date_to")).props("outlined dense").classes("w-48")
             ui.button(t("payments.filter.apply"), icon="search", on_click=lambda: reload()).props(
-                "flat color=indigo-7"
+                "flat color=primary"
             )
 
         table = ui.table(columns=columns, rows=[], row_key="id").classes("w-full sp-card").props("flat bordered")
@@ -313,15 +313,15 @@ def render() -> None:
                 if summary:
                     with summary_row:
                         for key, label_key, color in [
-                            ("income", "payments.summary.income", "text-green-700"),
-                            ("expense", "payments.summary.expense", "text-red-700"),
-                            ("refunded", "payments.summary.refunded", "text-grey-700"),
-                            ("profit", "payments.summary.profit", "text-indigo-700"),
-                            ("debt", "payments.summary.debt", "text-orange-700"),
+                            ("income", "payments.summary.income", "text-positive"),
+                            ("expense", "payments.summary.expense", "text-negative"),
+                            ("refunded", "payments.summary.refunded", "sp-text-2"),
+                            ("profit", "payments.summary.profit", "text-primary"),
+                            ("debt", "payments.summary.debt", "text-warning"),
                         ]:
                             with ui.card().classes("q-pa-sm sp-card"):
                                 ui.label(f"{summary.get(key, 0):,.0f}").classes(f"text-lg font-bold {color}")
-                                ui.label(t(label_key)).classes("text-caption text-grey-6")
+                                ui.label(t(label_key)).classes("text-caption sp-muted")
 
         async def _change_page(delta: int) -> None:
             new_page = state_page["page"] + delta
@@ -356,7 +356,7 @@ def _open_create_dialog(on_saved) -> None:
 
         client_search.on("keydown.enter", do_client_search)
         ui.button(t("payments.create.client_search_btn"), on_click=do_client_search).props(
-            "flat dense color=indigo-7"
+            "flat dense color=primary"
         )
 
         amount = ui.number(t("payments.create.amount"), min=0).props("outlined dense").classes("w-full")
@@ -376,7 +376,7 @@ def _open_create_dialog(on_saved) -> None:
         contract_id = ui.input(t("payments.create.contract_id")).props("outlined dense").classes("w-full")
         invoice_id = ui.input(t("payments.create.invoice_id")).props("outlined dense").classes("w-full")
         comment = ui.textarea(t("payments.create.comment")).props("outlined dense").classes("w-full")
-        err = ui.label("").classes("text-red-6 text-caption")
+        err = ui.label("").classes("text-negative text-caption")
 
         async def save() -> None:
             if not client_select.value:
@@ -408,7 +408,7 @@ def _open_create_dialog(on_saved) -> None:
 
         with ui.row().classes("w-full justify-end gap-2 q-mt-md"):
             ui.button(t("common.cancel"), on_click=dialog.close).props("flat")
-            ui.button(t("common.save"), on_click=save).props("unelevated color=indigo-7")
+            ui.button(t("common.save"), on_click=save).props("unelevated color=primary")
     dialog.open()
 
 
@@ -424,7 +424,7 @@ def _open_detail_dialog(payment_id: str, on_changed) -> None:
             except ApiError as exc:
                 content.clear()
                 with content:
-                    ui.label(exc.message).classes("text-red-6")
+                    ui.label(exc.message).classes("text-negative")
                 return
             content.clear()
             with content:
@@ -451,7 +451,7 @@ def _open_detail_dialog(payment_id: str, on_changed) -> None:
                     ui.label(f"{t('payments.detail.contract')}: № {contract.get('number', '')}")
                 ui.label(f"{t('payments.detail.comment')}: {data.get('comment') or '—'}")
                 ui.label(f"{t('payments.detail.paid_at')}: {data.get('paid_at') or '—'}").classes(
-                    "text-caption text-grey-6"
+                    "text-caption sp-muted"
                 )
 
                 if state.has_permission("payments.update"):
@@ -473,7 +473,7 @@ def _open_detail_dialog(payment_id: str, on_changed) -> None:
 
                     with ui.row().classes("gap-2"):
                         ui.button(t("payments.detail.save_status"), on_click=change_status).props(
-                            "flat color=indigo-7"
+                            "flat color=primary"
                         )
                         if data.get("status") == "PAID":
                             async def do_refund() -> None:
@@ -486,7 +486,7 @@ def _open_detail_dialog(payment_id: str, on_changed) -> None:
                                 await load()
                                 await on_changed()
 
-                            ui.button(t("payments.detail.refund"), on_click=do_refund).props("flat color=red")
+                            ui.button(t("payments.detail.refund"), on_click=do_refund).props("flat color=negative")
 
                 with ui.row().classes("w-full justify-end gap-2 q-mt-md"):
                     ui.button(t("common.close"), on_click=dialog.close).props("flat")
