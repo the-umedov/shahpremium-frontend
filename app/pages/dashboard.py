@@ -26,7 +26,11 @@ def render() -> None:
         roles = ", ".join(me.get("roles") or []) or t("dashboard.no_roles")
         ui.label(f"{t('dashboard.welcome')} — {t('dashboard.roles')}: {roles}").classes("text-grey-7")
 
-        cards = ui.row().classes("gap-4 w-full")
+        # Telefonda 2x2, planshet/kompyuterda 4 ustunli qator.
+        # DIQQAT: `columns=` parametrini bermaymiz — u inline `style` sifatida
+        # qo'yiladi va Tailwind'ning `md:grid-cols-4` klassidan ustun kelib,
+        # responsive xatti-harakatni butunlay bloklardi.
+        cards = ui.grid().classes("w-full gap-3 grid-cols-2 md:grid-cols-4")
         with cards:
             _stat_card(t("nav.clients"), "clients", "clients.read", "groups")
             _stat_card(t("nav.cases"), "cases", "cases.read", "gavel")
@@ -35,7 +39,7 @@ def render() -> None:
 
 
 def _stat_card(label: str, resource: str, perm: str, icon: str) -> None:
-    with ui.card().classes("sp-card q-pa-md").style("min-width:180px;"):
+    with ui.card().classes("sp-card q-pa-md w-full"):
         ui.icon(icon).classes("text-3xl text-indigo-600")
         ui.label(label).classes("text-grey-7 text-sm")
         value_label = ui.label("…").classes("text-2xl font-bold")
