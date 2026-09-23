@@ -79,39 +79,50 @@ def shell(active: str = ""):
     dark_mode = ui.dark_mode()
     _apply_theme(dark_mode)
 
-    with ui.header().classes("items-center justify-between").style(f"background:{PRIMARY}"):
-        with ui.row().classes("items-center gap-2"):
-            ui.image("/assets/logo-mammoth.png").style("width:36px;height:36px;")
-            ui.label("ShahPremium").classes("text-xl font-bold sp-brand")
-        with ui.row().classes("items-center gap-3"):
+    # Telefon/planshetda (1024px dan tor ekranlarda) chap panel avtomatik
+    # yashiriladi (overlay rejimi) — shu tugma bilan ochib-yopish mumkin.
+    drawer = ui.left_drawer(fixed=True).props("bordered breakpoint=1024")
+
+    with ui.header().classes("items-center justify-between q-px-sm").style(f"background:{PRIMARY}"):
+        with ui.row().classes("items-center gap-1 gap-sm-2"):
+            ui.button(icon="menu", on_click=drawer.toggle).props("flat round dense color=white")
+            ui.image("/assets/logo-mammoth.png").style("width:32px;height:32px;")
+            ui.label("ShahPremium").classes("text-lg sp-brand gt-xs").style("font-size:1.1rem;")
+        with ui.row().classes("items-center gap-1 gap-sm-3"):
             ui.select(
                 SUPPORTED_LOCALES,
                 value=state.get_locale(),
                 on_change=lambda e: _set_locale(e.value),
-            ).props("dense outlined dark options-dense").style("min-width:90px;background:rgba(255,255,255,.12);border-radius:8px;").tooltip(
-                "Til / Язык / Language"
-            )
+            ).props("dense outlined dark options-dense").style(
+                "min-width:64px;background:rgba(255,255,255,.12);border-radius:8px;"
+            ).tooltip("Til / Язык / Language")
             with ui.button(icon="dark_mode").props("flat round dense color=white"):
                 with ui.menu():
                     ui.menu_item(t("theme.light"), on_click=lambda: _set_theme(dark_mode, "light"))
                     ui.menu_item(t("theme.dark"), on_click=lambda: _set_theme(dark_mode, "dark"))
                     ui.menu_item(t("theme.system"), on_click=lambda: _set_theme(dark_mode, "system"))
-            ui.label(me.get("name") or me.get("email") or "").classes("text-sm opacity-90")
+            ui.label(me.get("name") or me.get("email") or "").classes("text-sm opacity-90 gt-xs")
             ui.button(icon="logout", on_click=_logout).props("flat round dense color=white").tooltip(t("auth.logout"))
 
-    with ui.left_drawer(fixed=True).props("bordered") as drawer:
+    with drawer:
         for label_key, path, icon, perm in NAV_ITEMS:
             if perm and not state.has_permission(perm):
                 continue
             is_active = active == path
+
+            def _go(p: str) -> None:
+                ui.navigate.to(p)
+                # Mobil overlay rejimida sahifa almashgach panel avtomatik yopilsin.
+                drawer.hide()
+
             with ui.row().classes(
                 "items-center gap-3 q-pa-sm full-width rounded-borders cursor-pointer "
                 + ("bg-indigo-50 text-indigo-700" if is_active else "")
-            ).on("click", lambda p=path: ui.navigate.to(p)):
+            ).on("click", lambda p=path: _go(p)):
                 ui.icon(icon)
                 ui.label(t(label_key)).classes("text-sm font-medium")
 
-    content = ui.column().classes("w-full max-w-6xl mx-auto q-pa-md gap-4")
+    content = ui.column().classes("w-full max-w-6xl mx-auto q-pa-sm q-pa-md-md gap-3 gap-md-4")
     return content
 
 

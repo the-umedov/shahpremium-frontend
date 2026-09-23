@@ -53,12 +53,19 @@ BRAND_OVERRIDE_CSS = f"""
     --sp-gold-soft: {GOLD_SOFT};
     --sp-ink: {INK};
   }}
-  body {{ background:{BODY_LIGHT}; }}
+  body {{ background:{BODY_LIGHT}; overflow-x:hidden; }}
   body.body--dark {{ background:{BODY_DARK}; color:#e9e4d8; }}
   body.body--dark .sp-card,
   body.body--dark .q-card {{ background:{INK_2}; color:#e9e4d8; }}
   body.body--dark .q-table {{ background:{INK_2}; color:#e9e4d8; }}
   .sp-card {{ border-radius:14px; }}
+
+  /* Telefon: kenglik torlashsa jadvallar butun sahifani siljitmasin — faqat
+     jadvalning o'zi gorizontal aylansin. */
+  .q-table__middle {{ overflow-x:auto; -webkit-overflow-scrolling:touch; }}
+  @media (max-width: 599px) {{
+    .q-table__middle {{ max-width:calc(100vw - 2rem); }}
+  }}
 
   /* indigo -> oltin (gold) — tugma to'ldirilgan holati */
   .bg-indigo-7, .bg-indigo-600, .bg-indigo-700 {{
