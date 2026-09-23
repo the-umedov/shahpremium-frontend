@@ -35,6 +35,16 @@ LIGHT = {
     "active-bg": "#F6ECD2",
     "active-text": GOLD_DEEP,
     "brand-text": GOLD_DEEP,
+    # Soyalar iliq-jigarrang tusda — sof qora soya fil suyagi fonda "iflos" ko'rinadi.
+    "shadow-sm": "0 1px 2px rgba(60,45,15,.06), 0 1px 3px rgba(60,45,15,.05)",
+    "shadow-md": "0 2px 4px rgba(60,45,15,.05), 0 10px 24px -8px rgba(60,45,15,.16)",
+    "shadow-lg": "0 4px 8px rgba(60,45,15,.06), 0 18px 40px -12px rgba(60,45,15,.24)",
+    "shadow-press": "inset 0 2px 4px rgba(60,45,15,.18)",
+    "glow": "0 6px 18px -4px rgba(138,109,31,.45)",
+    "scroll-thumb": "rgba(138,109,31,.35)",
+    "scroll-thumb-hover": "rgba(138,109,31,.6)",
+    "ring": "rgba(138,109,31,.22)",
+    "bg-glow": "rgba(212,175,85,.12)",
 }
 LIGHT_Q = {
     "primary": GOLD_DEEP,
@@ -59,6 +69,16 @@ DARK = {
     "active-bg": "rgba(212,175,85,.14)",
     "active-text": GOLD_LIGHT,
     "brand-text": GOLD_LIGHT,
+    # Qorong'i fonda soya ko'rinmaydi — chuqurlik o'rniga yengil oltin "nur" beramiz.
+    "shadow-sm": "0 1px 2px rgba(0,0,0,.4)",
+    "shadow-md": "0 2px 4px rgba(0,0,0,.35), 0 10px 24px -8px rgba(0,0,0,.6)",
+    "shadow-lg": "0 4px 8px rgba(0,0,0,.4), 0 18px 40px -12px rgba(0,0,0,.7)",
+    "shadow-press": "inset 0 2px 5px rgba(0,0,0,.5)",
+    "glow": "0 6px 20px -4px rgba(212,175,85,.4)",
+    "scroll-thumb": "rgba(212,175,85,.28)",
+    "scroll-thumb-hover": "rgba(212,175,85,.5)",
+    "ring": "rgba(212,175,85,.25)",
+    "bg-glow": "rgba(212,175,85,.06)",
 }
 # Qorong'i fonda to'q ranglar xira ko'rinadi — shu sababli ochroq tovlanishlar.
 DARK_Q = {
@@ -110,7 +130,12 @@ BRAND_OVERRIDE_CSS = f"""
   :root {{ {_vars(LIGHT)} }}
   body.body--dark {{ {_vars(DARK)} {_qvars(DARK_Q)} }}
 
-  body {{ background:var(--sp-bg) !important; color:var(--sp-text); overflow-x:hidden; }}
+  body {{
+    background-color:var(--sp-bg) !important;
+    background-image:radial-gradient(1100px 520px at 100% -10%, var(--sp-bg-glow), transparent 65%);
+    background-attachment:fixed;
+    color:var(--sp-text); overflow-x:hidden;
+  }}
 
   /* ---- brend ---- */
   .sp-brand {{ font-family:'Cinzel', 'Times New Roman', serif; letter-spacing:.06em; }}
@@ -126,9 +151,75 @@ BRAND_OVERRIDE_CSS = f"""
 
   /* ---- yuzalar: karta, jadval, menyu, yon panel ---- */
   .q-card, .sp-card, .q-table__card, .q-menu, .q-drawer {{
-    background:var(--sp-surface) !important; color:var(--sp-text);
+    background-color:var(--sp-surface) !important; color:var(--sp-text);
   }}
-  .sp-card {{ border-radius:14px; border:1px solid var(--sp-border); box-shadow:0 1px 3px rgba(23,20,15,.06); }}
+
+  /* ---- yumshoq konteynerlar: katta radius, qatlamli iliq soya, nozik yorug'lik ---- */
+  .sp-card {{
+    border-radius:16px; border:1px solid var(--sp-border);
+    box-shadow:var(--sp-shadow-md);
+    background-image:linear-gradient(180deg, rgba(255,255,255,.04), transparent 45%);
+    transition:box-shadow .2s ease, border-color .2s ease, transform .18s ease;
+  }}
+  .q-card {{ border-radius:14px; }}
+  .q-dialog .q-card {{ border-radius:18px; box-shadow:var(--sp-shadow-lg) !important; }}
+  .q-dialog__backdrop {{ background:rgba(23,20,15,.38) !important; backdrop-filter:blur(3px); }}
+  .q-menu {{ border-radius:12px; border:1px solid var(--sp-border); box-shadow:var(--sp-shadow-lg) !important; }}
+  .q-table__card {{ border-radius:14px; border:1px solid var(--sp-border); box-shadow:var(--sp-shadow-sm) !important; overflow:hidden; }}
+  .q-expansion-item.sp-card {{ overflow:hidden; }}
+  .q-field--outlined .q-field__control {{ border-radius:10px; }}
+  .q-badge {{ border-radius:999px; padding:3px 9px; }}
+  .q-notification {{ border-radius:12px; box-shadow:var(--sp-shadow-lg); }}
+  .q-header {{ box-shadow:var(--sp-shadow-sm); }}
+
+  /* ---- tugmalar: ustiga kelganda ko'tariladi, bosilganda soya + halqa ---- */
+  .q-btn {{ transition:transform .15s ease, box-shadow .2s ease, background-color .2s ease; }}
+  .q-btn:not(.q-btn--round):not(.q-btn--rounded) {{ border-radius:10px; }}
+  .q-btn:not(.q-btn--flat):not(.q-btn--outline) {{ box-shadow:var(--sp-shadow-sm); }}
+  .q-btn:not(.q-btn--flat):not(.q-btn--outline):hover {{ box-shadow:var(--sp-glow); transform:translateY(-1px); }}
+  .q-btn:not(.q-btn--flat):not(.q-btn--outline):active {{
+    box-shadow:var(--sp-shadow-press), 0 0 0 4px var(--sp-ring);
+    transform:translateY(0) scale(.98);
+  }}
+  .q-btn--flat:active, .q-btn--outline:active {{ box-shadow:0 0 0 4px var(--sp-ring); transform:scale(.96); }}
+
+  /* ---- bosiladigan kartalar (boshqaruv panelidagi hisoblar) ---- */
+  .sp-clickable {{ cursor:pointer; user-select:none; }}
+  .sp-clickable:hover {{ transform:translateY(-3px); box-shadow:var(--sp-shadow-lg); border-color:rgba(212,175,85,.5); }}
+  .sp-clickable:active {{
+    transform:translateY(-1px) scale(.985);
+    box-shadow:var(--sp-shadow-press), 0 0 0 4px var(--sp-ring);
+  }}
+
+  /* ---- yon panel navigatsiyasi ---- */
+  .sp-nav-item {{ border-radius:10px; transition:background-color .15s ease, transform .12s ease; }}
+  .sp-nav-item:not(.sp-active):hover {{ background:var(--sp-surface-2); }}
+  .sp-nav-item:active {{ transform:scale(.98); }}
+
+  /* Klaviatura bilan yurganda fokus ko'rinsin. */
+  .q-btn:focus-visible, .sp-clickable:focus-visible, .sp-nav-item:focus-visible {{
+    outline:2px solid var(--q-primary); outline-offset:2px;
+  }}
+
+  /* ---- scrollbar: ingichka, yumaloq, brend rangida ---- */
+  ::-webkit-scrollbar {{ width:10px; height:10px; }}
+  ::-webkit-scrollbar-track, ::-webkit-scrollbar-corner {{ background:transparent; }}
+  ::-webkit-scrollbar-thumb {{
+    background:var(--sp-scroll-thumb); border-radius:999px;
+    border:3px solid transparent; background-clip:padding-box;
+  }}
+  ::-webkit-scrollbar-thumb:hover {{
+    background:var(--sp-scroll-thumb-hover); border:2px solid transparent; background-clip:padding-box;
+  }}
+  /* Firefox ::-webkit-scrollbar'ni bilmaydi — unga standart xususiyatlar. */
+  @supports not selector(::-webkit-scrollbar) {{
+    * {{ scrollbar-width:thin; scrollbar-color:var(--sp-scroll-thumb) transparent; }}
+  }}
+
+  @media (prefers-reduced-motion: reduce) {{
+    .q-btn, .sp-card, .sp-clickable, .sp-nav-item {{ transition:none !important; }}
+    .q-btn:hover, .q-btn:active, .sp-clickable:hover, .sp-clickable:active {{ transform:none !important; }}
+  }}
   .q-drawer {{ border-color:var(--sp-border) !important; }}
   .q-separator {{ background:var(--sp-border) !important; }}
   .q-table th {{ color:var(--sp-muted); font-weight:600; }}

@@ -114,7 +114,7 @@ def shell(active: str = ""):
                 drawer.hide()
 
             with ui.row().classes(
-                "items-center gap-3 q-pa-sm full-width rounded-borders cursor-pointer "
+                "sp-nav-item items-center gap-3 q-pa-sm full-width cursor-pointer "
                 + ("sp-active text-primary" if is_active else "")
             ).on("click", lambda p=path: _go(p)):
                 ui.icon(icon)

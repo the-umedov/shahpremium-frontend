@@ -39,7 +39,10 @@ def render() -> None:
 
 
 def _stat_card(label: str, resource: str, perm: str, icon: str) -> None:
-    with ui.card().classes("sp-card q-pa-md w-full"):
+    card = ui.card().classes("sp-card q-pa-md w-full")
+    if state.has_permission(perm):
+        card.classes("sp-clickable").on("click", lambda: ui.navigate.to(f"/{resource}"))
+    with card:
         ui.icon(icon).classes("text-3xl text-primary")
         ui.label(label).classes("sp-text-2 text-sm")
         value_label = ui.label("…").classes("text-2xl font-bold")
