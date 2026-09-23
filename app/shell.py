@@ -7,7 +7,7 @@ from __future__ import annotations
 from nicegui import ui
 
 from app import state
-from app.i18n import SUPPORTED_LOCALES, t
+from app.i18n import LOCALE_LABELS, t
 from app.theme import BRAND_OVERRIDE_CSS, INK
 
 # (tarjima kaliti, yo'l, ikonka, ruxsat_yoki_None)
@@ -36,8 +36,6 @@ NAV_ITEMS = [
 ]
 
 PRIMARY = INK
-
-_LOCALE_LABELS = {"uz": "O'zbek", "ru": "Русский", "en": "English"}
 
 
 def require_login() -> bool:
@@ -90,7 +88,7 @@ def shell(active: str = ""):
             ui.label("ShahPremium").classes("text-lg sp-brand gt-xs").style("font-size:1.1rem;")
         with ui.row().classes("items-center gap-1 gap-sm-3"):
             ui.select(
-                SUPPORTED_LOCALES,
+                LOCALE_LABELS,
                 value=state.get_locale(),
                 on_change=lambda e: _set_locale(e.value),
             ).props("dense outlined dark options-dense").style(

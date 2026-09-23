@@ -169,7 +169,82 @@ CATALOG: dict[str, dict[str, str]] = {
 }
 
 DEFAULT_LOCALE = "uz"
-SUPPORTED_LOCALES = ["uz", "ru", "en"]
+CYRILLIC_LOCALE = "uz-Cyrl"
+SUPPORTED_LOCALES = ["uz", CYRILLIC_LOCALE, "ru", "en"]
+LOCALE_LABELS = {
+    "uz": "O'zbekcha",
+    CYRILLIC_LOCALE: "Ўзбекча",
+    "ru": "Русский",
+    "en": "English",
+}
+
+# Lotin -> krill harf almashtirish (rasmiy o'zbek transliteratsiya qoidalari).
+# Ikki harfli birikmalar (digraflar) doim bitta harfdan OLDIN tekshiriladi,
+# aks holda masalan "sh" ikkita alohida harf sifatida noto'g'ri o'girilardi.
+_UZ_DIGRAPHS = (
+    ("o'", "ў"), ("g'", "ғ"),
+    ("sh", "ш"), ("ch", "ч"), ("ng", "нг"),
+    ("yo", "ё"), ("yu", "ю"), ("ya", "я"),
+    ("ts", "ц"),
+)
+_UZ_SINGLES = {
+    "a": "а", "b": "б", "d": "д", "e": "е", "f": "ф", "g": "г", "h": "ҳ",
+    "i": "и", "j": "ж", "k": "к", "l": "л", "m": "м", "n": "н", "o": "о",
+    "p": "п", "q": "қ", "r": "р", "s": "с", "t": "т", "u": "у", "v": "в",
+    "x": "х", "y": "й", "z": "з",
+}
+
+
+def _to_cyrillic(text: str) -> str:
+    """Lotin yozuvidagi o'zbek matnini krill yozuviga o'giradi.
+
+    Har bir sahifada alohida "uz-Cyrl" lug'at yozib chiqmaslik uchun — mavjud
+    "uz" (lotin) tarjimalaridan avtomatik hosil qilinadi, shunda yangi til
+    butun ilova bo'ylab bir zumda, hech qaysi sahifa faylini tegmasdan ishlay
+    boshlaydi.
+    """
+    if not text:
+        return text
+    result: list[str] = []
+    i = 0
+    n = len(text)
+    while i < n:
+        ch = text[i]
+        if not ch.isalpha() and ch != "'":
+            result.append(ch)
+            i += 1
+            continue
+        pair = text[i : i + 2].lower()
+        # "yo'q" kabi so'zlarda "y" + "o'" (= й + ў) bor, "yo" digrafi (= ё) emas —
+        # keyingi belgi tutuq bo'lsa, "yo"ni digraf sifatida QABUL QILMAYMIZ.
+        if pair == "yo" and text[i + 2 : i + 3] == "'":
+            digraph = None
+        else:
+            digraph = next((d for d in _UZ_DIGRAPHS if d[0] == pair), None)
+        if digraph:
+            orig, rep = text[i : i + 2], digraph[1]
+            if orig[0].isupper():
+                result.append(rep[0].upper() + rep[1:])
+            else:
+                result.append(rep)
+            i += 2
+            continue
+        if ch == "'":
+            result.append("ъ")
+            i += 1
+            continue
+        low = ch.lower()
+        base = _UZ_SINGLES.get(low)
+        if base is None:
+            result.append(ch)
+            i += 1
+            continue
+        if low == "e":
+            prev = text[i - 1] if i > 0 else ""
+            base = "э" if not prev.isalpha() else "е"
+        result.append(base.upper() if ch.isupper() else base)
+        i += 1
+    return "".join(result)
 
 
 def register(translations: dict[str, dict[str, str]]) -> None:
@@ -183,6 +258,14 @@ def t(key: str) -> str:
     from app import state  # local import — aylanma import'dan qochish uchun
 
     locale = state.get_locale()
+
+    if locale == CYRILLIC_LOCALE:
+        explicit = CATALOG.get(CYRILLIC_LOCALE, {}).get(key)
+        if explicit is not None:
+            return explicit
+        latin = CATALOG.get(DEFAULT_LOCALE, {}).get(key)
+        return _to_cyrillic(latin) if latin is not None else key
+
     value = CATALOG.get(locale, {}).get(key)
     if value is not None:
         return value

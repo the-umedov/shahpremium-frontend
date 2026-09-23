@@ -4,7 +4,7 @@ from nicegui import ui
 
 from app import state
 from app.api_client import ApiClient, ApiError
-from app.i18n import SUPPORTED_LOCALES, register, t
+from app.i18n import LOCALE_LABELS, register, t
 from app.theme import BRAND_OVERRIDE_CSS, GOLD_DEEP
 
 register(
@@ -92,10 +92,10 @@ def render() -> None:
 
     with ui.row().classes("absolute top-0 right-0 q-ma-md gap-2 z-top"):
         ui.select(
-            SUPPORTED_LOCALES,
+            LOCALE_LABELS,
             value=state.get_locale(),
             on_change=lambda e: (state.set_locale(e.value), ui.navigate.reload()),
-        ).props("dense outlined options-dense").style("min-width:90px;")
+        ).props("dense outlined options-dense").style("min-width:110px;")
 
     with ui.column().classes("absolute-center items-center gap-1"):
         ui.image("/assets/logo-mammoth.png").style("width:110px;height:110px;")

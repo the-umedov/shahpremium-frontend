@@ -6,10 +6,9 @@ from nicegui import ui
 
 from app import state
 from app.api_client import ApiError
-from app.i18n import register, t
+from app.i18n import LOCALE_LABELS, register, t
 from app.shell import require_login, shell
 
-LOCALES = ["uz", "ru", "en"]
 THEMES = ["system", "light", "dark"]
 
 register(
@@ -117,7 +116,7 @@ def _render_preferences_section() -> None:
         form_col.clear()
         with form_col:
             with ui.row().classes("w-full gap-4"):
-                locale = ui.select(LOCALES, value=pref.get("locale", "uz"), label=t("settings.locale")).props(
+                locale = ui.select(LOCALE_LABELS, value=pref.get("locale", "uz"), label=t("settings.locale")).props(
                     "outlined dense"
                 ).classes("col")
                 theme = ui.select(THEMES, value=pref.get("theme", "system"), label=t("settings.theme")).props(
