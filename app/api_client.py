@@ -22,6 +22,30 @@ class ApiError(Exception):
         super().__init__(message)
 
 
+def _extract_error_detail(resp: httpx.Response) -> str:
+    """Xato javobidan xavfsiz, qisqa xabar chiqaradi.
+
+    MUHIM: backend uxlab qolganda (Render sleep) yoki tarmoq proksi xato bersa,
+    javob bizning FastAPI JSON emas, balki Render'ning butun HTML+CSS 502
+    sahifasi bo'lishi mumkin — buni to'g'ridan-to'g'ri foydalanuvchiga
+    ko'rsatish (avvalgi xato) o'rniga bu yerda ushlab, qisqa tushunarli
+    xabarga almashtiramiz.
+    """
+    content_type = resp.headers.get("content-type", "")
+    if "application/json" in content_type:
+        try:
+            data = resp.json()
+            detail = data.get("detail") or data.get("message")
+            if detail:
+                return str(detail)
+        except Exception:
+            pass
+    text = resp.text.strip()
+    if not text or text.startswith("<") or "html" in content_type:
+        return f"Server hozircha javob bermayapti (HTTP {resp.status_code}) — birozdan so'ng qayta urinib ko'ring"
+    return text[:300]
+
+
 class ApiClient:
     """Har bir brauzer sessiyasi (foydalanuvchi) uchun alohida instansiya."""
 
@@ -38,11 +62,7 @@ class ApiClient:
         async with httpx.AsyncClient(base_url=BASE_URL, timeout=15.0) as client:
             resp = await client.request(method, path, headers=self._headers(), **kwargs)
         if resp.status_code >= 400:
-            try:
-                detail = resp.json().get("detail") or resp.json().get("message") or resp.text
-            except Exception:
-                detail = resp.text or f"HTTP {resp.status_code}"
-            raise ApiError(resp.status_code, str(detail))
+            raise ApiError(resp.status_code, _extract_error_detail(resp))
         if resp.status_code == 204 or not resp.content:
             return None
         return resp.json()
@@ -110,7 +130,7 @@ class ApiClient:
         async with httpx.AsyncClient(base_url=BASE_URL, timeout=30.0) as client:
             resp = await client.post("/documents", headers=self._headers(), data=data, files=files)
         if resp.status_code >= 400:
-            raise ApiError(resp.status_code, resp.text)
+            raise ApiError(resp.status_code, _extract_error_detail(resp))
         return resp.json()
 
     async def document_link(self, document_id: str) -> dict:
@@ -149,11 +169,7 @@ class ApiClient:
         async with httpx.AsyncClient(base_url=BASE_URL, timeout=30.0) as client:
             resp = await client.get(f"/reports/{report_type}/export", headers=self._headers(), params=query)
         if resp.status_code >= 400:
-            try:
-                detail = resp.json().get("detail") or resp.text
-            except Exception:
-                detail = resp.text or f"HTTP {resp.status_code}"
-            raise ApiError(resp.status_code, str(detail))
+            raise ApiError(resp.status_code, _extract_error_detail(resp))
         filename = f"{report_type}.{fmt}"
         content_disposition = resp.headers.get("content-disposition", "")
         if "filename=" in content_disposition:
@@ -262,11 +278,7 @@ class ApiClient:
         async with httpx.AsyncClient(base_url=BASE_URL, timeout=15.0) as client:
             resp = await client.post(f"/chat/{chat_id}/messages", headers=self._headers(), data=data, files=files)
         if resp.status_code >= 400:
-            try:
-                detail = resp.json().get("detail") or resp.text
-            except Exception:
-                detail = resp.text or f"HTTP {resp.status_code}"
-            raise ApiError(resp.status_code, str(detail))
+            raise ApiError(resp.status_code, _extract_error_detail(resp))
         return resp.json()
 
     async def chat_mark_read(self, chat_id: str) -> dict:
