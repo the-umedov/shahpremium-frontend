@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: shahpremium-frontend
+    runtime: docker
+    plan: free
+    envVars:
+      - key: SHAHPREMIUM_API_URL
+        sync: false # backend'ning Render URL'i + /api/v1 (masalan https://shahpremium-backend.onrender.com/api/v1)
+      - key: SHAHPREMIUM_STORAGE_SECRET
+        generateValue: true

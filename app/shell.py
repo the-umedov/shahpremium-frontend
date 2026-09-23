@@ -1,0 +1,120 @@
+"""Umumiy sahifa qobig'i: header + chap navigatsiya paneli (barcha himoyalangan
+sahifalarda takrorlanadigan qism). Light/Dark/System tema va uz/ru/en til
+almashtirish shu yerda markazlashtirilgan (04_Design_System_i18n.md)."""
+
+from __future__ import annotations
+
+from nicegui import ui
+
+from app import state
+from app.i18n import SUPPORTED_LOCALES, t
+from app.theme import BRAND_OVERRIDE_CSS, INK
+
+# (tarjima kaliti, yo'l, ikonka, ruxsat_yoki_None)
+NAV_ITEMS = [
+    ("nav.dashboard", "/", "dashboard", None),
+    ("nav.clients", "/clients", "groups", "clients.read"),
+    ("nav.cases", "/cases", "gavel", "cases.read"),
+    ("nav.contracts", "/contracts", "description", "contracts.read"),
+    ("nav.documents", "/documents", "folder", "documents.read"),
+    ("nav.appointments", "/appointments", "event", "appointments.manage"),
+    ("nav.tasks", "/tasks", "checklist", "tasks.read"),
+    ("nav.payments", "/payments", "payments", "payments.read"),
+    ("nav.reports", "/reports", "bar_chart", "reports.read"),
+    ("nav.notifications", "/notifications", "notifications", "notifications.read"),
+    ("nav.chat", "/chat", "forum", "chat.use"),
+    ("nav.employees", "/employees", "badge", "employees.read"),
+    ("nav.regions", "/regions", "map", None),
+    ("nav.offices", "/offices", "apartment", None),
+    ("nav.services", "/services", "handyman", None),
+    ("nav.users", "/users", "manage_accounts", "users.read"),
+    ("nav.roles", "/roles", "admin_panel_settings", "roles.manage"),
+    ("nav.permissions", "/permissions", "vpn_key", "roles.manage"),
+    ("nav.audit", "/audit", "history", "audit.read"),
+    ("nav.integrations", "/integrations", "integration_instructions", "integrations.manage"),
+    ("nav.settings", "/settings", "settings", None),
+]
+
+PRIMARY = INK
+
+_LOCALE_LABELS = {"uz": "O'zbek", "ru": "Русский", "en": "English"}
+
+
+def require_login() -> bool:
+    """Token yo'q bo'lsa /login'ga yo'naltiradi. False qaytsa, sahifa chizilmasligi kerak."""
+    if not state.is_authenticated():
+        ui.navigate.to("/login")
+        return False
+    return True
+
+
+def _apply_theme(dark_mode: ui.dark_mode) -> None:
+    theme = state.get_theme()
+    if theme == "dark":
+        dark_mode.value = True
+    elif theme == "light":
+        dark_mode.value = False
+    else:
+        dark_mode.value = None  # 'system' — Quasar OS afzalligiga qarab avtomatik
+
+
+def _set_theme(dark_mode: ui.dark_mode, theme: str) -> None:
+    state.set_theme(theme)
+    _apply_theme(dark_mode)
+
+
+def _set_locale(locale: str) -> None:
+    state.set_locale(locale)
+    # t() render vaqtida baholanadi — yangi tilni butun sahifada qo'llash
+    # uchun eng ishonchli yo'l to'liq qayta yuklash.
+    ui.navigate.reload()
+
+
+def shell(active: str = ""):
+    """Header + drawer chizadi. Sahifa mazmuni uchun `with shell(...):` konteksti qaytaradi."""
+    me = state.get_me() or {}
+
+    ui.add_head_html(BRAND_OVERRIDE_CSS)
+
+    dark_mode = ui.dark_mode()
+    _apply_theme(dark_mode)
+
+    with ui.header().classes("items-center justify-between").style(f"background:{PRIMARY}"):
+        with ui.row().classes("items-center gap-2"):
+            ui.image("/assets/logo-mammoth.png").style("width:36px;height:36px;")
+            ui.label("ShahPremium").classes("text-xl font-bold sp-brand")
+        with ui.row().classes("items-center gap-3"):
+            ui.select(
+                SUPPORTED_LOCALES,
+                value=state.get_locale(),
+                on_change=lambda e: _set_locale(e.value),
+            ).props("dense outlined dark options-dense").style("min-width:90px;background:rgba(255,255,255,.12);border-radius:8px;").tooltip(
+                "Til / Язык / Language"
+            )
+            with ui.button(icon="dark_mode").props("flat round dense color=white"):
+                with ui.menu():
+                    ui.menu_item(t("theme.light"), on_click=lambda: _set_theme(dark_mode, "light"))
+                    ui.menu_item(t("theme.dark"), on_click=lambda: _set_theme(dark_mode, "dark"))
+                    ui.menu_item(t("theme.system"), on_click=lambda: _set_theme(dark_mode, "system"))
+            ui.label(me.get("name") or me.get("email") or "").classes("text-sm opacity-90")
+            ui.button(icon="logout", on_click=_logout).props("flat round dense color=white").tooltip(t("auth.logout"))
+
+    with ui.left_drawer(fixed=True).props("bordered") as drawer:
+        for label_key, path, icon, perm in NAV_ITEMS:
+            if perm and not state.has_permission(perm):
+                continue
+            is_active = active == path
+            with ui.row().classes(
+                "items-center gap-3 q-pa-sm full-width rounded-borders cursor-pointer "
+                + ("bg-indigo-50 text-indigo-700" if is_active else "")
+            ).on("click", lambda p=path: ui.navigate.to(p)):
+                ui.icon(icon)
+                ui.label(t(label_key)).classes("text-sm font-medium")
+
+    content = ui.column().classes("w-full max-w-6xl mx-auto q-pa-md gap-4")
+    return content
+
+
+def _logout() -> None:
+    state.clear_session()
+    ui.navigate.to("/login")
