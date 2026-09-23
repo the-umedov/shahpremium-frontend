@@ -19,6 +19,7 @@ register(
             "register.first_name": "Ism",
             "register.last_name": "Familiya",
             "register.email": "Email",
+            "register.phone": "Telefon",
             "register.password": "Parol",
             "register.confirm_password": "Parolni tasdiqlang",
             "register.submit": "Ro'yxatdan o'tish",
@@ -37,6 +38,7 @@ register(
             "register.first_name": "Имя",
             "register.last_name": "Фамилия",
             "register.email": "Email",
+            "register.phone": "Телефон",
             "register.password": "Пароль",
             "register.confirm_password": "Подтвердите пароль",
             "register.submit": "Зарегистрироваться",
@@ -55,6 +57,7 @@ register(
             "register.first_name": "First name",
             "register.last_name": "Last name",
             "register.email": "Email",
+            "register.phone": "Phone",
             "register.password": "Password",
             "register.confirm_password": "Confirm password",
             "register.submit": "Register",
@@ -136,6 +139,7 @@ def _register_panel() -> None:
     first_name = ui.input(t("register.first_name")).props("outlined dense").classes("w-full")
     last_name = ui.input(t("register.last_name")).props("outlined dense").classes("w-full q-mt-sm")
     email = ui.input(t("register.email")).props("outlined dense").classes("w-full q-mt-sm")
+    phone = ui.input(t("register.phone")).props("outlined dense").classes("w-full q-mt-sm")
     password = ui.input(t("register.password"), password=True, password_toggle_button=True).props(
         "outlined dense"
     ).classes("w-full q-mt-sm")
@@ -162,6 +166,7 @@ def _register_panel() -> None:
                 password=password.value,
                 first_name=first_name.value,
                 last_name=last_name.value,
+                phone=phone.value or None,
             )
         except ApiError as exc:
             error_label.text = exc.message
