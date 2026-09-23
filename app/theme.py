@@ -67,6 +67,22 @@ BRAND_OVERRIDE_CSS = f"""
     .q-table__middle {{ max-width:calc(100vw - 2rem); }}
   }}
 
+  /* Telefon: har bir sahifadagi "+ Qo'shish"/"Tahrirlash" dialoglari o'zining
+     ichki `style("min-width:...px")` qiymati (380-820px) bilan ochiladi — bu
+     tor ekranda `body{{overflow-x:hidden}}` tomonidan kesilib, tugma/maydonlar
+     bosilmaydigan, "buzilgan" ko'rinishga olib kelardi. Shu yerda barcha
+     dialog kartalarini ekran kengligiga majburan sig'diramiz (faqat telefon
+     enida — desktop/planshetdagi har bir sahifaning o'z kengligi saqlanadi). */
+  @media (max-width: 599px) {{
+    .q-dialog .q-card {{
+      min-width:0 !important;
+      width:92vw !important;
+      max-width:92vw !important;
+      max-height:88vh;
+      overflow-y:auto;
+    }}
+  }}
+
   /* indigo -> oltin (gold) — tugma to'ldirilgan holati */
   .bg-indigo-7, .bg-indigo-600, .bg-indigo-700 {{
     background:{GOLD_DEEP} !important; color:#fff !important;

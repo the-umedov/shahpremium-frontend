@@ -29,6 +29,8 @@ register(
             "roles.confirm_delete": "«{name}» rolini o'chirmoqchimisiz?",
             "roles.key_required": "Kalit va nomi majburiy",
             "roles.system_no_delete": "Tizim rolini o'chirib bo'lmaydi",
+            "roles.users_title": "Ushbu rolga biriktirilgan foydalanuvchilar",
+            "roles.no_users": "Hech kim biriktirilmagan",
         },
         "ru": {
             "roles.no_access": "У вас нет прав для просмотра этого раздела",
@@ -50,6 +52,8 @@ register(
             "roles.confirm_delete": "Удалить роль «{name}»?",
             "roles.key_required": "Ключ и название обязательны",
             "roles.system_no_delete": "Системную роль нельзя удалить",
+            "roles.users_title": "Пользователи с этой ролью",
+            "roles.no_users": "Никто не назначен",
         },
         "en": {
             "roles.no_access": "You do not have permission to view this section",
@@ -71,6 +75,8 @@ register(
             "roles.confirm_delete": "Delete role «{name}»?",
             "roles.key_required": "Key and name are required",
             "roles.system_no_delete": "A system role cannot be deleted",
+            "roles.users_title": "Users assigned to this role",
+            "roles.no_users": "No one assigned",
         },
     }
 )
@@ -128,6 +134,15 @@ def _role_card(r: dict, on_changed) -> None:
         with ui.row().classes("gap-1 flex-wrap q-mt-xs"):
             for p in perms:
                 ui.badge(p.get("key", "")).props("color=indigo-4")
+
+        ui.label(t("roles.users_title")).classes("text-caption text-grey-6 font-medium q-mt-sm")
+        users = r.get("users") or []
+        if not users:
+            ui.label(t("roles.no_users")).classes("text-caption text-grey-5")
+        else:
+            with ui.row().classes("gap-1 flex-wrap q-mt-xs"):
+                for u in users:
+                    ui.badge(u.get("email", "")).props("color=grey-7").classes("q-py-xs")
 
         with ui.row().classes("gap-2 q-mt-sm"):
             ui.button(t("roles.edit"), icon="edit", on_click=lambda r=r: _open_role_dialog(r, on_changed)).props(
