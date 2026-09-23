@@ -119,7 +119,9 @@ def _render_preferences_section() -> None:
                 locale = ui.select(LOCALE_LABELS, value=pref.get("locale", "uz"), label=t("settings.locale")).props(
                     "outlined dense"
                 ).classes("col")
-                theme = ui.select(THEMES, value=pref.get("theme", "system"), label=t("settings.theme")).props(
+                theme = ui.select(
+                    {key: t(f"theme.{key}") for key in THEMES}, value=pref.get("theme", "system"), label=t("settings.theme")
+                ).props(
                     "outlined dense"
                 ).classes("col")
                 timezone = ui.input(t("settings.timezone"), value=pref.get("timezone", "Asia/Tashkent")).props(

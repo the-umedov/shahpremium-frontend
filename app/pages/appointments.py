@@ -297,7 +297,7 @@ def _render_queue_tab() -> None:
             for status_key in QUEUE_STATUS_KEYS:
                 label = t(f"status.{status_key}")
                 entries = board.get(status_key, [])
-                with ui.column().classes("sp-card bg-white q-pa-sm").style("min-width:200px; max-width:240px;"):
+                with ui.column().classes("sp-lane q-pa-sm").style("min-width:200px; max-width:240px;"):
                     ui.label(f"{label} ({len(entries)})").classes("text-sm font-bold q-mb-xs")
                     if not entries:
                         ui.label(t("appointments.queue_empty")).classes("text-caption sp-subtle")

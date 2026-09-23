@@ -56,13 +56,25 @@ def _apply_theme(dark_mode: ui.dark_mode) -> None:
         dark_mode.value = None  # 'system' — Quasar OS afzalligiga qarab avtomatik
 
 
-def _set_theme(dark_mode: ui.dark_mode, theme: str) -> None:
+async def _persist_preference(field: str, value: str) -> None:
+    # Sozlamalar sahifasi ochilganda brauzer holatini backend'dagi qiymat bilan
+    # sinxronlaydi — header'dagi tanlov backend'ga ham yozilmasa, mavzu/til
+    # keyingi safar eski qiymatga "qaytib qolardi".
+    try:
+        await state.client().update_preferences({field: value})
+    except Exception:  # noqa: BLE001 — UI darhol o'zgaradi, saqlash xatosi bloklamasin
+        pass
+
+
+async def _set_theme(dark_mode: ui.dark_mode, theme: str) -> None:
     state.set_theme(theme)
     _apply_theme(dark_mode)
+    await _persist_preference("theme", theme)
 
 
-def _set_locale(locale: str) -> None:
+async def _set_locale(locale: str) -> None:
     state.set_locale(locale)
+    await _persist_preference("locale", locale)
     # t() render vaqtida baholanadi — yangi tilni butun sahifada qo'llash
     # uchun eng ishonchli yo'l to'liq qayta yuklash.
     ui.navigate.reload()

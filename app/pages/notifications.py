@@ -100,7 +100,7 @@ def render() -> None:
             is_read = bool(it.get("is_read"))
             with ui.row().classes(
                 "w-full items-start gap-3 q-pa-sm sp-card cursor-pointer "
-                + ("bg-white" if is_read else "sp-active")
+                + ("" if is_read else "sp-active")
             ).on("click", lambda i=it: _mark_one(i["id"])):
                 ui.icon("fiber_manual_record" if not is_read else "check_circle").classes(
                     ("text-primary" if not is_read else "sp-subtle") + " text-xs q-mt-xs"

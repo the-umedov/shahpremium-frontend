@@ -141,17 +141,34 @@ BRAND_OVERRIDE_CSS = f"""
   .sp-brand {{ font-family:'Cinzel', 'Times New Roman', serif; letter-spacing:.06em; }}
   .sp-brand-text {{ color:var(--sp-brand-text); }}
   .q-header {{ border-bottom:1px solid rgba(212,175,85,.18); }}
+  /* Header ikkala mavzuda ham qora — ichidagi elementlar (til tanlagichi va h.k.)
+     yorug' mavzuda ham qorong'i mavzu tokenlari bilan chizilsin. */
+  .q-header {{
+    --sp-text:{DARK["text"]}; --sp-muted:{DARK["muted"]}; --sp-surface:{DARK["surface"]};
+    --sp-border:rgba(255,255,255,.22); color:{DARK["text"]};
+  }}
+  .q-header .q-field__native, .q-header .q-field__marginal {{ color:{DARK["text"]}; }}
 
-  /* ---- semantik matn / fon klasslari ---- */
+  /* ---- yuzalar: karta, jadval, menyu, yon panel, vaqt/sana tanlagich ---- */
+  .q-card, .sp-card, .q-table__card, .q-menu, .q-drawer, .q-date, .q-time, .q-uploader {{
+    background-color:var(--sp-surface) !important; color:var(--sp-text);
+  }}
+  /* Quasar tab panelga o'z oq/qora fonini beradi — karta ichida alohida
+     to'rtburchak bo'lib ko'rinardi. Fon ota-elementdan olinsin. */
+  .q-tab-panels, .q-tab-panel {{ background:transparent !important; }}
+  .q-tooltip {{ background:var(--sp-text); color:var(--sp-surface); border-radius:8px; font-size:12px; }}
+
+  /* ---- semantik matn / fon klasslari (yuzalardan KEYIN — ularni bosib o'tishi uchun) ---- */
   .sp-text-2 {{ color:var(--sp-text-2) !important; }}
   .sp-muted {{ color:var(--sp-muted) !important; }}
   .sp-subtle {{ color:var(--sp-subtle) !important; }}
-  .sp-active {{ background:var(--sp-active-bg) !important; color:var(--sp-active-text) !important; }}
-  .sp-surface-2 {{ background:var(--sp-surface-2) !important; color:var(--sp-text); }}
-
-  /* ---- yuzalar: karta, jadval, menyu, yon panel ---- */
-  .q-card, .sp-card, .q-table__card, .q-menu, .q-drawer {{
-    background-color:var(--sp-surface) !important; color:var(--sp-text);
+  .sp-surface-2 {{ background-color:var(--sp-surface-2) !important; color:var(--sp-text); }}
+  .sp-active {{ background-color:var(--sp-active-bg) !important; color:var(--sp-active-text) !important; }}
+  /* Kanban/navbat ustunlari: sahifa fonidan biroz ajralib turadigan "yo'lak",
+     ichidagi oq/qora kartalar esa undan ko'tarilib ko'rinadi. */
+  .sp-lane {{
+    background-color:var(--sp-surface-2); color:var(--sp-text);
+    border:1px solid var(--sp-border); border-radius:16px;
   }}
 
   /* ---- yumshoq konteynerlar: katta radius, qatlamli iliq soya, nozik yorug'lik ---- */
@@ -246,7 +263,13 @@ BRAND_OVERRIDE_CSS = f"""
 
   /* Qorong'i mavzuda to'ldirilgan rangli tugma/belgilar ochroq bo'ladi —
      ular ustidagi oq matn o'qilmay qolmasligi uchun qora matn. */
-  {_ON_COLOR} {{ color:{INK} !important; }}
+  /* MUHIM: NiceGUI 3 Quasar'ning !important klasslarini (.text-white va h.k.)
+     `quasar_importants` CSS qatlamiga joylaydi. !important'da qatlamdagi qoida
+     qatlamsiz qoidadan doim kuchli — shu sababli bunday qoidalar faqat undan
+     OLDIN e'lon qilingan `overrides` qatlami ichida ishlaydi. */
+  @layer overrides {{
+    {_ON_COLOR} {{ color:{INK} !important; }}
+  }}
 
   /* ---- telefon moslashuvi ---- */
   .q-table__middle {{ overflow-x:auto; -webkit-overflow-scrolling:touch; }}

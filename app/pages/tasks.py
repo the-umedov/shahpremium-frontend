@@ -162,7 +162,7 @@ def render() -> None:
 
 
 def _render_column(label: str, items: list[dict], on_changed, movable: bool) -> None:
-    with ui.column().classes("sp-card bg-white q-pa-sm").style("min-width:270px; max-width:320px;"):
+    with ui.column().classes("sp-lane q-pa-sm").style("min-width:270px; max-width:320px;"):
         ui.label(f"{label} ({len(items)})").classes("text-sm font-bold q-mb-xs")
         if not items:
             ui.label(t("tasks.col_empty")).classes("text-caption sp-subtle")
