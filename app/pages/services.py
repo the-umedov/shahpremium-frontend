@@ -32,6 +32,7 @@ register(
             "services.saved": "Saqlandi",
             "services.deleted": "Xizmat o'chirildi",
             "services.total": "Jami: {n} ta",
+            "services.see_all": "Barchasi",
         },
         "ru": {
             "services.search": "Поиск (название, код)",
@@ -51,6 +52,7 @@ register(
             "services.saved": "Сохранено",
             "services.deleted": "Услуга удалена",
             "services.total": "Всего: {n}",
+            "services.see_all": "Все",
         },
         "en": {
             "services.search": "Search (name, code)",
@@ -70,6 +72,7 @@ register(
             "services.saved": "Saved",
             "services.deleted": "Service deleted",
             "services.total": "Total: {n}",
+            "services.see_all": "See all",
         },
     }
 )
@@ -94,6 +97,9 @@ def render() -> None:
             add_btn = ui.button(t("services.new"), icon="add", on_click=lambda: _open_form_dialog(None, reload))
             add_btn.props("unelevated color=primary")
             add_btn.set_visibility(can_manage)
+
+        if state.is_client() and state.has_permission("appointments.manage"):
+            _specialists_box()
 
         with ui.row().classes("w-full items-end gap-2"):
             search = ui.input(t("services.search")).props("outlined dense clearable").classes("col")
@@ -146,6 +152,32 @@ def render() -> None:
         search.on("keydown.enter", _reload_first_page)
         category_filter.on_value_change(_reload_first_page)
         ui.timer(0.05, reload, once=True)
+
+
+def _specialists_box() -> None:
+    """Mijoz uchun: xizmatlar ro'yxati ustida "Advokat va yuristlar" bloki."""
+    from app.pages.specialists import render_specialist_cards
+
+    with ui.column().classes("sp-lane w-full q-pa-md gap-2"):
+        with ui.row().classes("w-full items-center justify-between no-wrap"):
+            with ui.row().classes("items-center gap-2 no-wrap"):
+                ui.icon("balance").classes("text-2xl text-primary")
+                ui.label(t("nav.specialists")).classes("text-lg font-bold")
+            ui.button(t("services.see_all"), icon="arrow_forward", on_click=lambda: ui.navigate.to("/specialists")).props(
+                "flat dense color=primary"
+            )
+        box = ui.column().classes("w-full")
+
+    async def load() -> None:
+        try:
+            items = await state.client().list_specialists()
+        except ApiError:
+            items = []
+        box.clear()
+        with box:
+            render_specialist_cards((items or [])[:6])
+
+    ui.timer(0.05, load, once=True)
 
 
 def _open_form_dialog(service: dict | None, on_saved) -> None:
