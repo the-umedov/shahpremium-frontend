@@ -33,9 +33,15 @@ from app.pages import (
     roles,
     services,
     settings,
+    specialists,
     tasks,
     users,
 )
+
+
+@ui.page("/specialists")
+def _specialists_page() -> None:
+    specialists.render()
 
 
 @ui.page("/login")

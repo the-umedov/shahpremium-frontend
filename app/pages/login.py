@@ -120,7 +120,6 @@ def _login_panel() -> None:
     password = ui.input(t("auth.password"), password=True, password_toggle_button=True).props(
         "outlined dense"
     ).classes("w-full q-mt-sm")
-    otp = ui.input(t("auth.otp")).props("outlined dense").classes("w-full q-mt-sm")
     error_label = ui.label("").classes("text-negative text-caption")
 
     async def do_login() -> None:
@@ -132,7 +131,6 @@ def _login_panel() -> None:
 
     ui.button(t("auth.submit"), on_click=do_login).props("unelevated color=primary").classes("w-full q-mt-md")
     password.on("keydown.enter", do_login)
-    otp.on("keydown.enter", do_login)
 
 
 def _register_panel() -> None:

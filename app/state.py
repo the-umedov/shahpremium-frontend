@@ -29,6 +29,20 @@ def is_authenticated() -> bool:
     return bool(get_token())
 
 
+def is_client() -> bool:
+    """CLIENT rolidagi foydalanuvchi — unga menyu va boshqaruv paneli boshqacha ko'rsatiladi."""
+    me = get_me() or {}
+    return "CLIENT" in (me.get("roles") or [])
+
+
+def get_drawer_mini() -> bool:
+    return bool(app.storage.user.get("drawer_mini", False))
+
+
+def set_drawer_mini(mini: bool) -> None:
+    app.storage.user["drawer_mini"] = mini
+
+
 def has_permission(perm: str) -> bool:
     me = get_me() or {}
     granted = set(me.get("permissions") or [])

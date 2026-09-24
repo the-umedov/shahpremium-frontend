@@ -98,6 +98,13 @@ class ApiClient:
     async def delete(self, resource: str, item_id: str) -> dict:
         return await self._request("DELETE", f"/{resource}/{item_id}")
 
+    # ---- regions: districts ----
+    async def add_district(self, region_id: str, name: str) -> dict:
+        return await self._request("POST", f"/regions/{region_id}/districts", json={"name": name})
+
+    async def remove_district(self, region_id: str, district_id: str) -> dict:
+        return await self._request("DELETE", f"/regions/{region_id}/districts/{district_id}")
+
     # ---- clients: timeline note ----
     async def add_client_note(self, client_id: str, title: str, description: str | None = None) -> dict:
         return await self._request(

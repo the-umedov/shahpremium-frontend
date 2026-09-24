@@ -13,27 +13,47 @@ from app.theme import BRAND_OVERRIDE_CSS, INK
 # (tarjima kaliti, yo'l, ikonka, ruxsat_yoki_None)
 NAV_ITEMS = [
     ("nav.dashboard", "/", "dashboard", None),
+    ("nav.employees", "/employees", "badge", "employees.read"),
+    ("nav.services", "/services", "handyman", None),
     ("nav.clients", "/clients", "groups", "clients.read"),
     ("nav.cases", "/cases", "gavel", "cases.read"),
+    ("nav.permissions", "/permissions", "vpn_key", "roles.manage"),
+    ("nav.reports", "/reports", "bar_chart", "reports.read"),
     ("nav.contracts", "/contracts", "description", "contracts.read"),
     ("nav.documents", "/documents", "folder", "documents.read"),
     ("nav.appointments", "/appointments", "event", "appointments.manage"),
     ("nav.tasks", "/tasks", "checklist", "tasks.read"),
     ("nav.payments", "/payments", "payments", "payments.read"),
-    ("nav.reports", "/reports", "bar_chart", "reports.read"),
     ("nav.notifications", "/notifications", "notifications", "notifications.read"),
     ("nav.chat", "/chat", "forum", "chat.use"),
-    ("nav.employees", "/employees", "badge", "employees.read"),
     ("nav.regions", "/regions", "map", None),
     ("nav.offices", "/offices", "apartment", None),
-    ("nav.services", "/services", "handyman", None),
     ("nav.users", "/users", "manage_accounts", "users.read"),
     ("nav.roles", "/roles", "admin_panel_settings", "roles.manage"),
-    ("nav.permissions", "/permissions", "vpn_key", "roles.manage"),
     ("nav.audit", "/audit", "history", "audit.read"),
     ("nav.integrations", "/integrations", "integration_instructions", "integrations.manage"),
     ("nav.settings", "/settings", "settings", None),
 ]
+
+# Mijoz (CLIENT) menyusi: xizmatlar tepada, advokat/yuristlar alohida bo'lim,
+# suhbatlar yo'q.
+CLIENT_NAV_ITEMS = [
+    ("nav.dashboard", "/", "dashboard", None),
+    ("nav.services", "/services", "handyman", None),
+    ("nav.specialists", "/specialists", "balance", "appointments.manage"),
+    ("nav.cases", "/cases", "gavel", "cases.read"),
+    ("nav.contracts", "/contracts", "description", "contracts.read"),
+    ("nav.documents", "/documents", "folder", "documents.read"),
+    ("nav.appointments", "/appointments", "event", "appointments.manage"),
+    ("nav.payments", "/payments", "payments", "payments.read"),
+    ("nav.notifications", "/notifications", "notifications", "notifications.read"),
+    ("nav.regions", "/regions", "map", None),
+    ("nav.offices", "/offices", "apartment", None),
+    ("nav.settings", "/settings", "settings", None),
+]
+
+# Shu kenglikdan tor ekranda panel "overlay" (ustidan ochiladigan) rejimga o'tadi.
+DRAWER_BREAKPOINT = 1024
 
 PRIMARY = INK
 
@@ -90,12 +110,28 @@ def shell(active: str = ""):
     _apply_theme(dark_mode)
 
     # Telefon/planshetda (1024px dan tor ekranlarda) chap panel avtomatik
-    # yashiriladi (overlay rejimi) — shu tugma bilan ochib-yopish mumkin.
-    drawer = ui.left_drawer(fixed=True).props("bordered breakpoint=1024")
+    # yashiriladi (overlay rejimi). Kompyuterda esa gamburger tugmasi panelni
+    # butunlay yopmaydi — "mini" rejimga o'tkazadi (ekran chetida faqat ikonkalar).
+    mini = state.get_drawer_mini()
+    drawer = ui.left_drawer(fixed=True).props(f"bordered breakpoint={DRAWER_BREAKPOINT}")
+    if mini:
+        drawer.props("mini")
+
+    async def toggle_drawer() -> None:
+        width = await ui.run_javascript("window.innerWidth")
+        if width and width >= DRAWER_BREAKPOINT:
+            new_mini = not state.get_drawer_mini()
+            state.set_drawer_mini(new_mini)
+            if new_mini:
+                drawer.props("mini")
+            else:
+                drawer.props(remove="mini")
+        else:
+            drawer.toggle()
 
     with ui.header().classes("items-center justify-between q-px-sm").style(f"background:{PRIMARY}"):
         with ui.row().classes("items-center gap-1 gap-sm-2"):
-            ui.button(icon="menu", on_click=drawer.toggle).props("flat round dense color=white")
+            ui.button(icon="menu", on_click=toggle_drawer).props("flat round dense color=white")
             ui.image("/assets/logo-mammoth.png").style("width:32px;height:32px;")
             ui.label("ShahPremium").classes("text-lg sp-brand gt-xs").style("font-size:1.1rem;")
         with ui.row().classes("items-center gap-1 gap-sm-3"):
@@ -115,22 +151,23 @@ def shell(active: str = ""):
             ui.button(icon="logout", on_click=_logout).props("flat round dense color=white").tooltip(t("auth.logout"))
 
     with drawer:
-        for label_key, path, icon, perm in NAV_ITEMS:
+        items = CLIENT_NAV_ITEMS if state.is_client() else NAV_ITEMS
+        for label_key, path, icon, perm in items:
             if perm and not state.has_permission(perm):
                 continue
             is_active = active == path
 
-            def _go(p: str) -> None:
-                ui.navigate.to(p)
-                # Mobil overlay rejimida sahifa almashgach panel avtomatik yopilsin.
-                drawer.hide()
-
+            # DIQQAT: bu yerda drawer.hide() CHAQIRILMAYDI — kompyuterda u panelni
+            # yopib qo'yardi va yangi sahifa uni qayta ochardi (panel "yo'qolib qayta
+            # chiqardi"). Yangi sahifa baribir panelni ekran kengligiga qarab chizadi.
             with ui.row().classes(
-                "sp-nav-item items-center gap-3 q-pa-sm full-width cursor-pointer "
+                "sp-nav-item items-center gap-3 q-pa-sm full-width cursor-pointer no-wrap "
                 + ("sp-active text-primary" if is_active else "")
-            ).on("click", lambda p=path: _go(p)):
-                ui.icon(icon)
-                ui.label(t(label_key)).classes("text-sm font-medium")
+            ).on("click", lambda p=path: ui.navigate.to(p)):
+                ui.icon(icon).classes("sp-nav-icon")
+                ui.label(t(label_key)).classes("text-sm font-medium q-mini-drawer-hide ellipsis")
+                if mini:
+                    ui.tooltip(t(label_key)).props("anchor='center right' self='center left' :offset='[10, 0]'")
 
     content = ui.column().classes("w-full max-w-6xl mx-auto q-pa-sm q-pa-md-md gap-3 gap-md-4")
     return content

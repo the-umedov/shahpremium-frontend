@@ -212,6 +212,10 @@ BRAND_OVERRIDE_CSS = f"""
   .sp-nav-item {{ border-radius:10px; transition:background-color .15s ease, transform .12s ease; }}
   .sp-nav-item:not(.sp-active):hover {{ background:var(--sp-surface-2); }}
   .sp-nav-item:active {{ transform:scale(.98); }}
+  /* Mini rejim: panel ekran chetida faqat ikonkalar bilan qoladi. */
+  .q-drawer--mini.nicegui-drawer, .q-drawer--mini .nicegui-drawer {{ padding:8px !important; }}
+  .q-drawer--mini .sp-nav-item {{ justify-content:center; padding-left:0 !important; padding-right:0 !important; }}
+  .sp-nav-icon {{ font-size:20px; flex-shrink:0; }}
 
   /* Klaviatura bilan yurganda fokus ko'rinsin. */
   .q-btn:focus-visible, .sp-clickable:focus-visible, .sp-nav-item:focus-visible {{
