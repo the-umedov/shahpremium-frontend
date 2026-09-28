@@ -105,6 +105,14 @@ def shell(active: str = ""):
     me = state.get_me() or {}
 
     ui.add_head_html(BRAND_OVERRIDE_CSS)
+    # Ilova ichidagi fon: oltin chiziqli video, ustida mavzuga mos yumshoq parda va
+    # ekran markazida zo'rg'a sezilib turadigan mamont. Login sahifasida yo'q.
+    ui.add_body_html(
+        '<video class="sp-bg-video" autoplay muted loop playsinline preload="auto" aria-hidden="true" '
+        'src="/assets/bg-circuit.mp4"></video>'
+        '<div class="sp-bg-veil" aria-hidden="true"></div>'
+        '<img class="sp-bg-mark" src="/assets/logo-mammoth.png" alt="" aria-hidden="true">'
+    )
 
     dark_mode = ui.dark_mode()
     _apply_theme(dark_mode)

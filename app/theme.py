@@ -45,6 +45,12 @@ LIGHT = {
     "scroll-thumb-hover": "rgba(138,109,31,.6)",
     "ring": "rgba(138,109,31,.22)",
     "bg-glow": "rgba(212,175,85,.12)",
+    # Fon videosi ustidagi parda: yorug' mavzuda video juda nozik "iz" bo'lib qoladi.
+    "veil": "rgba(247,244,236,.88)",
+    # Yarim shaffof yuzalar (karta, panel) — orqadagi video xiralashib ko'rinadi.
+    "glass": "rgba(255,255,255,.84)",
+    "glass-2": "rgba(243,237,224,.78)",
+    "mark-opacity": ".06",
 }
 LIGHT_Q = {
     "primary": GOLD_DEEP,
@@ -79,6 +85,10 @@ DARK = {
     "scroll-thumb-hover": "rgba(212,175,85,.5)",
     "ring": "rgba(212,175,85,.25)",
     "bg-glow": "rgba(212,175,85,.06)",
+    "veil": "rgba(21,19,15,.72)",
+    "glass": "rgba(31,27,21,.80)",
+    "glass-2": "rgba(42,37,29,.72)",
+    "mark-opacity": ".08",
 }
 # Qorong'i fonda to'q ranglar xira ko'rinadi — shu sababli ochroq tovlanishlar.
 DARK_Q = {
@@ -150,9 +160,31 @@ BRAND_OVERRIDE_CSS = f"""
   .q-header .q-field__native, .q-header .q-field__marginal {{ color:{DARK["text"]}; }}
 
   /* ---- yuzalar: karta, jadval, menyu, yon panel, vaqt/sana tanlagich ---- */
-  .q-card, .sp-card, .q-table__card, .q-menu, .q-drawer, .q-date, .q-time, .q-uploader {{
+  .q-menu, .q-date, .q-time, .q-uploader {{
     background-color:var(--sp-surface) !important; color:var(--sp-text);
   }}
+  /* Karta, jadval va yon panel — yarim shaffof "shisha": orqadagi fon videosi
+     xiralashib, sahifaga yumshoq chuqurlik beradi. */
+  .q-card, .sp-card, .q-table__card, .q-drawer {{
+    background-color:var(--sp-glass) !important; color:var(--sp-text);
+    -webkit-backdrop-filter:blur(14px) saturate(1.15); backdrop-filter:blur(14px) saturate(1.15);
+  }}
+  .q-table {{ background:transparent !important; }}
+
+  /* ---- ilova ichidagi fon: video + parda + markazdagi mamont (shell.py) ---- */
+  .sp-bg-video, .sp-bg-veil, .sp-bg-mark {{ position:fixed; pointer-events:none; }}
+  .sp-bg-video {{ inset:0; width:100vw; height:100vh; object-fit:cover; z-index:-3; }}
+  .sp-bg-veil {{
+    inset:0; z-index:-2; background:var(--sp-veil);
+    /* Chetlar biroz to'qroq — ko'z markazga, kontentga tortiladi. */
+    box-shadow:inset 0 0 180px 40px var(--sp-veil);
+  }}
+  .sp-bg-mark {{
+    left:50%; top:50%; transform:translate(-50%, -50%);
+    width:min(40vw, 440px); z-index:-1; opacity:var(--sp-mark-opacity);
+    filter:blur(.3px);
+  }}
+  body:has(.sp-bg-video) {{ background-image:none; }}
   /* Quasar tab panelga o'z oq/qora fonini beradi — karta ichida alohida
      to'rtburchak bo'lib ko'rinardi. Fon ota-elementdan olinsin. */
   .q-tab-panels, .q-tab-panel {{ background:transparent !important; }}
@@ -167,27 +199,41 @@ BRAND_OVERRIDE_CSS = f"""
   /* Kanban/navbat ustunlari: sahifa fonidan biroz ajralib turadigan "yo'lak",
      ichidagi oq/qora kartalar esa undan ko'tarilib ko'rinadi. */
   .sp-lane {{
-    background-color:var(--sp-surface-2); color:var(--sp-text);
-    border:1px solid var(--sp-border); border-radius:16px;
+    background-color:var(--sp-glass-2); color:var(--sp-text);
+    border:1px solid var(--sp-border); border-radius:18px;
+    -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
   }}
 
   /* ---- yumshoq konteynerlar: katta radius, qatlamli iliq soya, nozik yorug'lik ---- */
   .sp-card {{
-    border-radius:16px; border:1px solid var(--sp-border);
+    border-radius:20px; border:1px solid var(--sp-border);
     box-shadow:var(--sp-shadow-md);
-    background-image:linear-gradient(180deg, rgba(255,255,255,.04), transparent 45%);
-    transition:box-shadow .2s ease, border-color .2s ease, transform .18s ease;
+    background-image:linear-gradient(180deg, rgba(255,255,255,.05), transparent 45%);
+    transition:box-shadow .25s ease, border-color .25s ease, transform .2s ease;
   }}
-  .q-card {{ border-radius:14px; }}
-  .q-dialog .q-card {{ border-radius:18px; box-shadow:var(--sp-shadow-lg) !important; }}
-  .q-dialog__backdrop {{ background:rgba(23,20,15,.38) !important; backdrop-filter:blur(3px); }}
-  .q-menu {{ border-radius:12px; border:1px solid var(--sp-border); box-shadow:var(--sp-shadow-lg) !important; }}
-  .q-table__card {{ border-radius:14px; border:1px solid var(--sp-border); box-shadow:var(--sp-shadow-sm) !important; overflow:hidden; }}
+  .q-card {{ border-radius:18px; }}
+  .q-dialog .q-card {{ border-radius:22px; box-shadow:var(--sp-shadow-lg) !important; }}
+  .q-dialog__backdrop {{ background:rgba(23,20,15,.34) !important; backdrop-filter:blur(6px); }}
+  .q-menu {{ border-radius:14px; border:1px solid var(--sp-border); box-shadow:var(--sp-shadow-lg) !important; }}
+  .q-table__card {{ border-radius:18px; border:1px solid var(--sp-border); box-shadow:var(--sp-shadow-sm) !important; overflow:hidden; }}
   .q-expansion-item.sp-card {{ overflow:hidden; }}
-  .q-field--outlined .q-field__control {{ border-radius:10px; }}
+  .q-field--outlined .q-field__control {{ border-radius:12px; transition:box-shadow .2s ease; }}
+  /* Fokusdagi maydon atrofida yumshoq oltin halqa (keskin chiziq o'rniga). */
+  .q-field--outlined.q-field--focused .q-field__control {{ box-shadow:0 0 0 3px var(--sp-ring); }}
   .q-badge {{ border-radius:999px; padding:3px 9px; }}
-  .q-notification {{ border-radius:12px; box-shadow:var(--sp-shadow-lg); }}
-  .q-header {{ box-shadow:var(--sp-shadow-sm); }}
+  .q-chip {{ border-radius:999px; }}
+  .q-notification {{ border-radius:14px; box-shadow:var(--sp-shadow-lg); }}
+  /* Header: shisha kabi yarim shaffof qora (inline rang ustidan). */
+  .q-header {{
+    background:rgba(23,20,15,.88) !important; box-shadow:var(--sp-shadow-sm);
+    -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+  }}
+  .q-table tbody tr {{ transition:background-color .18s ease; }}
+
+  /* Sahifa ochilganda keskin chiqmasin — yumshoq paydo bo'lsin. */
+  @keyframes sp-fade-in {{ from {{ opacity:0; }} to {{ opacity:1; }} }}
+  .q-page-container {{ animation:sp-fade-in .35s ease-out both; }}
+  body {{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }}
 
   /* ---- tugmalar: ustiga kelganda ko'tariladi, bosilganda soya + halqa ---- */
   .q-btn {{ transition:transform .15s ease, box-shadow .2s ease, background-color .2s ease; }}
@@ -240,7 +286,11 @@ BRAND_OVERRIDE_CSS = f"""
   @media (prefers-reduced-motion: reduce) {{
     .q-btn, .sp-card, .sp-clickable, .sp-nav-item {{ transition:none !important; }}
     .q-btn:hover, .q-btn:active, .sp-clickable:hover, .sp-clickable:active {{ transform:none !important; }}
+    /* Harakatni kamaytirishni so'ragan foydalanuvchiga video ko'rsatilmaydi. */
+    .sp-bg-video {{ display:none; }}
+    .q-page-container {{ animation:none; }}
   }}
+  @media print {{ .sp-bg-video, .sp-bg-veil, .sp-bg-mark {{ display:none; }} }}
   .q-drawer {{ border-color:var(--sp-border) !important; }}
   .q-separator {{ background:var(--sp-border) !important; }}
   .q-table th {{ color:var(--sp-muted); font-weight:600; }}
