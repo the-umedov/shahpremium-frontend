@@ -31,6 +31,7 @@ register(
             "audit.detail_reason": "Sabab: {value}",
             "audit.before": "Oldin (before)",
             "audit.after": "Keyin (after)",
+            "audit.retention_note": "Jurnalda faqat so'nggi 3 kunlik yozuvlar saqlanadi, eskilari avtomatik o'chiriladi.",
         },
         "ru": {
             "audit.forbidden": "У вас нет доступа к этой странице",
@@ -52,6 +53,7 @@ register(
             "audit.detail_reason": "Причина: {value}",
             "audit.before": "До (before)",
             "audit.after": "После (after)",
+            "audit.retention_note": "В журнале хранятся записи только за последние 3 дня, более старые удаляются автоматически.",
         },
         "en": {
             "audit.forbidden": "You don't have permission to view this page",
@@ -73,6 +75,7 @@ register(
             "audit.detail_reason": "Reason: {value}",
             "audit.before": "Before",
             "audit.after": "After",
+            "audit.retention_note": "Only the last 3 days of records are kept; older ones are deleted automatically.",
         },
     }
 )
@@ -88,6 +91,7 @@ def render() -> None:
             return
 
         ui.label(t("nav.audit")).classes("text-2xl font-bold")
+        ui.label(t("audit.retention_note")).classes("text-caption sp-muted")
 
         columns = [
             {"name": "created_at", "label": t("audit.col_time"), "field": "created_at", "align": "left"},
