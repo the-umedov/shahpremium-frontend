@@ -127,9 +127,15 @@ def _login_panel() -> None:
         if not identifier.value or not password.value:
             error_label.text = t("login.required")
             return
-        await _finish_login(identifier.value, password.value, error_label)
+        # Server uyg'onayotgan bo'lsa (Render) javob bir necha o'n soniya kechikishi
+        # mumkin — tugma "yuklanmoqda" holatida tursin, qotib qolgandek ko'rinmasin.
+        submit.props("loading")
+        try:
+            await _finish_login(identifier.value, password.value, error_label)
+        finally:
+            submit.props(remove="loading")
 
-    ui.button(t("auth.submit"), on_click=do_login).props("unelevated color=primary").classes("w-full q-mt-md")
+    submit = ui.button(t("auth.submit"), on_click=do_login).props("unelevated color=primary").classes("w-full q-mt-md")
     password.on("keydown.enter", do_login)
 
 
@@ -158,6 +164,7 @@ def _register_panel() -> None:
             error_label.text = t("register.password_weak")
             return
         api = ApiClient()
+        submit.props("loading")
         try:
             await api.register(
                 email=email.value,
@@ -166,16 +173,18 @@ def _register_panel() -> None:
                 last_name=last_name.value,
                 phone=phone.value or None,
             )
+            ui.notify(t("register.success"), type="positive")
+            # Ro'yxatdan o'tish token qaytarmaydi (email tasdiqlash oqimi bor) —
+            # qulaylik uchun darhol shu login/parol bilan kirishga urinamiz.
+            await _finish_login(email.value, password.value, error_label)
         except ApiError as exc:
             error_label.text = exc.message
-            return
         except Exception as exc:  # noqa: BLE001
             error_label.text = f"{t('login.network_error')}: {exc}"
-            return
-        ui.notify(t("register.success"), type="positive")
-        # Ro'yxatdan o'tish token qaytarmaydi (email tasdiqlash oqimi bor) —
-        # qulaylik uchun darhol shu login/parol bilan kirishga urinamiz.
-        await _finish_login(email.value, password.value, error_label)
+        finally:
+            submit.props(remove="loading")
 
-    ui.button(t("register.submit"), on_click=do_register).props("unelevated color=primary").classes("w-full q-mt-md")
+    submit = ui.button(t("register.submit"), on_click=do_register).props("unelevated color=primary").classes(
+        "w-full q-mt-md"
+    )
     confirm.on("keydown.enter", do_register)

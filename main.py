@@ -162,6 +162,19 @@ def _settings_page() -> None:
 apply_app_colors()
 app.add_static_files("/assets", "assets")
 
+
+def _wake_backend_in_background() -> None:
+    # Render'da frontend va backend alohida uxlaydi: frontend uyg'onishi bilan
+    # backend'ni ham uyg'ota boshlaymiz, foydalanuvchi login bosguncha u tayyor bo'lsin.
+    from nicegui import background_tasks
+
+    from app.api_client import wake_backend
+
+    background_tasks.create(wake_backend(), name="wake-backend")
+
+
+app.on_startup(_wake_backend_in_background)
+
 if __name__ in {"__main__", "__mp_main__"}:
     ui.run(
         title="ShahPremium",

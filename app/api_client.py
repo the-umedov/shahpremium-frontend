@@ -7,12 +7,31 @@ tayanmaydi, shu bilan NiceGUI serverining o'zidan chiquvchi so'rovlar bilan mos.
 
 from __future__ import annotations
 
+import asyncio
 import os
+import time
 from typing import Any
 
 import httpx
 
 BASE_URL = os.environ.get("SHAHPREMIUM_API_URL", "http://127.0.0.1:4000/api/v1")
+
+# Render bepul tarifida backend 15 daqiqa so'rovsiz qolsa uxlaydi va uyg'onishi
+# 30-60 soniya oladi. Shu vaqtda Render proksisi 502/503/504 qaytaradi yoki ulanish
+# uziladi — bu javoblar so'rov ilovaga YETIB BORMAGANINI bildiradi, shuning uchun
+# har qanday so'rovni (POST ham) xavfsiz qayta yuborish mumkin.
+WAKE_STATUSES = {502, 503, 504}
+WAKE_WAIT_SECONDS = 75
+WAKE_RETRY_DELAY = 3
+
+
+async def wake_backend() -> None:
+    """Backend'ni oldindan uyg'otadi (frontend ishga tushganda chaqiriladi)."""
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            await client.get(f"{BASE_URL}/health")
+    except Exception:  # noqa: BLE001 — faqat uyg'otish, natija muhim emas
+        pass
 
 
 class ApiError(Exception):
@@ -59,8 +78,21 @@ class ApiClient:
         return headers
 
     async def _request(self, method: str, path: str, **kwargs: Any) -> Any:
-        async with httpx.AsyncClient(base_url=BASE_URL, timeout=15.0) as client:
-            resp = await client.request(method, path, headers=self._headers(), **kwargs)
+        deadline = time.monotonic() + WAKE_WAIT_SECONDS
+        while True:
+            try:
+                async with httpx.AsyncClient(base_url=BASE_URL, timeout=30.0) as client:
+                    resp = await client.request(method, path, headers=self._headers(), **kwargs)
+            except (httpx.ConnectError, httpx.ConnectTimeout, httpx.RemoteProtocolError):
+                # Ulanish umuman o'rnatilmadi — so'rov backend'ga yetmagan, qayta urinish xavfsiz.
+                if time.monotonic() >= deadline:
+                    raise
+                await asyncio.sleep(WAKE_RETRY_DELAY)
+                continue
+            if resp.status_code in WAKE_STATUSES and time.monotonic() < deadline:
+                await asyncio.sleep(WAKE_RETRY_DELAY)
+                continue
+            break
         if resp.status_code >= 400:
             raise ApiError(resp.status_code, _extract_error_detail(resp))
         if resp.status_code == 204 or not resp.content:
